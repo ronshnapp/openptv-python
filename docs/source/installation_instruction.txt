@@ -80,6 +80,13 @@ restart the bash terminal and update the packages (some might be already install
 	 make verify
 	 sudo make install
 	 
+#. Install Python bindings for the library (installs ```optv``` module)::
+
+	cd ~/openptv/py_bind
+	python setup.py build_ext -I/usr/local/include -L/usr/local/lib
+	python setup.py install
+	
+	 
 #. Get OpenPTV-Python::    
 
 	 git clone git://github.com/OpenPTV/openptv-python.git
