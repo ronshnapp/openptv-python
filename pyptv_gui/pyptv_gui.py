@@ -7,15 +7,17 @@ The software is distributed under the terms of MIT-like license
 http://opensource.org/licenses/MIT
 
 """
-from traits.etsconfig.api import ETSConfig
-# ETSConfig.toolkit = 'qt4'
-ETSConfig.toolkit = 'wx'
+import os
+import sys
+import numpy as np
 
 from traits.api \
     import HasTraits, Str, Int, List, Bool, Enum, Instance, Any
 from traitsui.api \
     import TreeEditor, TreeNode, View, Item, \
-            Handler, Group          
+            Handler, Group 
+
+
 from enable.component_editor import ComponentEditor
 from chaco.api import Plot, ArrayPlotData, gray
 from traitsui.menu import MenuBar, Menu, Action
@@ -26,9 +28,7 @@ from skimage import img_as_ubyte
 from threading import Thread
 from pyface.api import GUI
 
-import os
-import sys
-import numpy as np
+
 
 # Parse inputs:
 
@@ -63,7 +63,7 @@ if not os.path.isdir(src_path):
 sys.path.append(src_path) 
 
 import ptv1 as ptv
-# from tracking_framebuf import read_targets
+from optv.tracking_framebuf import read_targets
 
 # pyPTV specific imports
 import general
