@@ -10,13 +10,14 @@ Both PyPTV and the OpenPTV library are in the development phase and continuously
 
 ## Documentation, including installation instructions
 
-http://alexlib.github.io/docs/index.html
+<http://openptv-python.readthedocs.io>
 
 ## Getting started:
 
 If the compilation passed, open the terminal and run:  
 
-		python pyptv_gui/pyptv_gui.py
+		ETS_TOOLKIT=wx 
+		pythonw pyptv_gui/pyptv_gui.py
 
 Follow the instructions in our **screencasts and tutorials**:
   
