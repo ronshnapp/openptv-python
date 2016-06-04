@@ -8,11 +8,15 @@ from traitsui.api \
 from traitsui.menu \
     import Menu, Action, Separator
 
-# from traitsui.wx.tree_editor import NewAction, CopyAction, CutAction,PasteAction, DeleteAction, RenameAction    
-from traitsui.qt4.tree_editor import NewAction, CopyAction, CutAction, \
-            PasteAction, DeleteAction, RenameAction
 
-                 
+from traits.etsconfig.api import ETSConfig
+
+if (ETSConfig.toolkit == 'wx'):
+    from traitsui.wx.tree_editor import NewAction, CopyAction, CutAction,PasteAction, \
+    DeleteAction, RenameAction 
+elif (ETSConfig.toolkit == 'qt4'):
+    from traitsui.qt4.tree_editor import NewAction, CopyAction, CutAction, PasteAction, \
+    DeleteAction, RenameAction
 
 import parameters as par
 import numpy as n

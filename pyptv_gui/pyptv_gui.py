@@ -7,15 +7,18 @@ The software is distributed under the terms of MIT-like license
 http://opensource.org/licenses/MIT
 
 """
-from traits.etsconfig.api import ETSConfig
-ETSConfig.toolkit = 'qt4'
-# ETSConfig.toolkit = 'wx'
+
+import os
+import sys
+import numpy as np
 
 from traits.api \
     import HasTraits, Str, Int, List, Bool, Enum, Instance, Any
 from traitsui.api \
     import TreeEditor, TreeNode, View, Item, \
-            Handler, Group          
+            Handler, Group 
+
+
 from enable.component_editor import ComponentEditor
 from chaco.api import Plot, ArrayPlotData, gray
 from traitsui.menu import MenuBar, Menu, Action
@@ -24,9 +27,7 @@ from scipy.misc import imread
 from threading import Thread
 from pyface.api import GUI
 
-import os
-import sys
-import numpy as np
+
 
 # Parse inputs:
 
