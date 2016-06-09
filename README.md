@@ -16,8 +16,15 @@ Both PyPTV and the OpenPTV library are in the development phase and continuously
 
 If the compilation passed, open the terminal and run:  
 
-		ETS_TOOLKIT=wx 
-		pythonw pyptv_gui/pyptv_gui.py
+		python pyptv_gui/pyptv_gui.py test_cavity
+		
+or:  
+
+		pythonw pyptv_gui/pyptv_gui.py test_cavity
+		
+It is possible to install wxPython instead of PyQt4, and switch between those:  
+
+		ETS_TOOLKIT=wx python pyptv_gui.py test_cavity
 
 Follow the instructions in our **screencasts and tutorials**:
   
