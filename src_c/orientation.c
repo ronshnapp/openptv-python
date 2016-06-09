@@ -1013,13 +1013,10 @@ int         *num_used;  /* Number of points used for orientation */
 
   /* show original images with residual vectors (requires globals) */
   for (i = 0; i < n_obs - 10; i += 2) {
-    n = pixnr[i/2];
-    //intx2 = intx1 + resi[i]*5000;
-    //inty2 = inty1 + resi[i+1]*5000;
-    resid_x[n]=resi[i];
-	resid_y[n]=resi[i+1];
+    resid_x[pixnr[i/2]]=resi[i];
+	resid_y[pixnr[i/2]]=resi[i+1];
   }
-  *num_used = n; /* last n, maximal. */
+  *num_used = (n_obs - 10)/2;
 
 
   if (convergeflag){
