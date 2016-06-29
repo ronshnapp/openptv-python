@@ -67,7 +67,7 @@ Installing on Ubuntu (14.04 LTS "Trusty"):
 
 	$ bash Anaconda2-4.0.0-Linux-x86.sh
 
-restart the bash terminal and update the packages (some might be already installed) ::
+   restart the bash terminal and update the packages (some might be already installed) ::
 
 	 conda update conda
 	 conda update anaconda
