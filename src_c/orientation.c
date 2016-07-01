@@ -463,7 +463,7 @@ int	       	nfix;		# of object points
 		 if(best_residual-residual < 0){ //then try other direction
 			 cal[i_img].ext_par.omega -= 2*drad;
 			 rotation_matrix (&(cal[i_img].ext_par));
-	         eval_ori_v2(cal, db_scale, weight_scale, cpar->mm, nfix, 
+	         eval_ori_v2(cal, db_scale, weight_scale, cpar->num_cams, nfix, 
                 &epi_miss, &dist, &residual, *(cpar->mm));
 			 if(best_residual-residual < 0){// then leave it unchanged
                   cal[i_img].ext_par.omega += drad;
@@ -1066,7 +1066,7 @@ int raw_orient_v3 (Exterior Ex0, Interior I, Glass G0, ap_52 ap, mm_np mm,
 
 ///////////make a menu so one see the raw guess!!!!!
   if(only_show==1) stopflag=1;
-/////// Beat Lüthi 9. Mai 2007
+/////// Beat LÃ¼thi 9. Mai 2007
 
   while ((stopflag == 0) && (itnum < 20)) {
     ++itnum;
