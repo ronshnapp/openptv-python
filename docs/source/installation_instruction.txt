@@ -326,6 +326,11 @@ add the location of the ``liboptv`` files in the next step, e.g.::
 For Windows 7 (8.1) there is an additional option to use pre-compiled binaries as explained here: `Installation on Windows 7 using MinGW <installation_windows_7_mingw32_precompiled.html>`_
 
 
+Can I use a virtual machine? 
+----------------------------
+
+Yes, follow these instructions https://github.com/OpenPTV/openptv-python/wiki/No-Installation-with-Virtual-Machine 
+
 
 If I do not want to use package managers but to get all the Python packages at once?
 ------------------------------------------------------------------------------------
