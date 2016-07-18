@@ -42,7 +42,11 @@ int trajectories_c(int i, control_par *cpar)
  
       fp1 = fopen (val, "r");
       
-  seq_par = read_sequence_par("parameters/sequence.par", cpar->num_cams);
+    if (cpar->num_cams < 3){
+        seq_par = read_sequence_par("parameters/sequence.par", 4);
+    } else {
+        seq_par = read_sequence_par("parameters/sequence.par", cpar->num_cams);
+    }
   color = ((double)(i - seq_par->first)) / ((double)(seq_par->last - 2 - seq_par->first));
       fscanf (fp1,"%d\n", &anz1);
       

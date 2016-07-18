@@ -55,7 +55,11 @@ void prepare_eval (control_par *cpar, int *n_fix) {
     frame frm;
     frame_init(&frm, cpar->num_cams, MAX_TARGETS);
     
-	seq_par = read_sequence_par("parameters/sequence.par", cpar->num_cams);
+    if (cpar->num_cams < 3){
+        seq_par = read_sequence_par("parameters/sequence.par", 4);
+    } else {
+        seq_par = read_sequence_par("parameters/sequence.par", cpar->num_cams);
+    }
 
 	fpp = fopen ("parameters/dumbbell.par", "r");
     if (fpp){
@@ -119,7 +123,12 @@ void prepare_eval_shake(control_par *cpar) {
     frame frm;
     frame_init(&frm, cpar->num_cams, MAX_TARGETS);
     
-	seq_par = read_sequence_par("parameters/sequence.par", cpar->num_cams);
+    if (cpar->num_cams < 3){
+        seq_par = read_sequence_par("parametes/sequence.par", 4);
+    } else {
+        seq_par = read_sequence_par("parameters/sequence.par", cpar->num_cams);
+    }
+
 
 	fpp = fopen ("parameters/shaking.par", "r");
     fscanf (fpp,"%d\n", &seq_first);
