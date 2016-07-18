@@ -577,17 +577,17 @@ class TreeMenuHandler (Handler):
             # main loop - format image name, read it and call v.py_sequence_loop(..) for current step
             for i in range(seq_first,seq_last+1,stepshake):
                 seq_ch="%04d" % i
-                    
                 for j in range (n_camera):
                     img_name=base_name[j]+seq_ch
-                    print ("Setting image: ",img_name)
+                    print ("Setting image: %s" % img_name)
                     try:
                         temp_img=imread(img_name).astype(np.ubyte)
                     except:
                         print "Error reading file"
                            
                     ptv.py_set_img(temp_img,j)
-                    ptv.py_sequence_loop(0,i)
+                    
+                ptv.py_sequence_loop(0,i)
         else:
             print "Sequence by using "+extern_sequence
             sequence=seq.Sequence(ptv=ptv, exp1=info.object.exp1,camera_list=info.object.camera_list)
@@ -1080,7 +1080,7 @@ class MainGUI (HasTraits):
 
 
     def load_disp_image(self, img_name,j,display_only=False):
-        print ("Setting image: "+str(img_name))
+        print ("Setting image: %s" % str(img_name))
         temp_img=np.array([],dtype=np.ubyte)
         try:
             temp_img=imread(img_name).astype(np.ubyte)
