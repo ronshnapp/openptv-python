@@ -60,11 +60,8 @@ control_par *cpar;
   /* read image name, threshold and shape limits from parameter file */
 
 /*------------------------------------------------------------------------*/
-  printf("inside peak_fit_new\n");
   fpp = fopen(par_file,"r");
   if (fpp){
-  	printf("opened file %s", &par_file);
-  	printf("assigned file header %d", fpp);
   	fscanf (fpp, "%d", &gvthres[0]);      /* threshold for binarization 1.image */
   	fscanf (fpp, "%d", &gvthres[1]);      /* threshold for binarization 2.image */
   	fscanf (fpp, "%d", &gvthres[2]);      /* threshold for binarization 3.image */

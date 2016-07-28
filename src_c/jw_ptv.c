@@ -411,8 +411,6 @@ int detection_proc_c(char **image_names)
         /* reorganize target numbers */
         for (i=0; i<num[i_img]; i++)  pix[i_img][i].pnr = i;
     }
-    printf("pix.x01=%f\n",pix[0][0].x);
-	printf("pix.y01=%f\n",pix[0][0].y);
     
     sprintf (buf, "Number of detected particles per image");
     printf("%s\n", val);

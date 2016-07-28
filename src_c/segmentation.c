@@ -115,11 +115,8 @@ control_par *cpar;
   imy = cpar->imy;
 
   /* read image name, filter dimension and threshold from parameter file */
-  printf("inside targ_rec (segmentation.c) \n");
   fpp = fopen(par_file,"r");
   if (fpp){
-  	printf("opened file %s", &par_file);
-  	printf("assigned file header %d", fpp);
   	fscanf (fpp, "%d", &gvthres[0]);      /* threshold for binarization 1.image */
   	fscanf (fpp, "%d", &gvthres[1]);      /* threshold for binarization 2.image */
   	fscanf (fpp, "%d", &gvthres[2]);      /* threshold for binarization 3.image */
@@ -133,7 +130,7 @@ control_par *cpar;
   	fclose (fpp);
   }
   else{
-  	printf("problem opening %s\n", &par_file);
+  	printf("error opening %s in segmentation.c\n", &par_file);
   }
   /* give thres value refering to image number */
   thres=gvthres[nr];
