@@ -7,7 +7,6 @@ The software is distributed under the terms of MIT-like license
 http://opensource.org/licenses/MIT
 
 """
-
 import os
 import sys
 import numpy as np
@@ -23,7 +22,9 @@ from enable.component_editor import ComponentEditor
 from chaco.api import Plot, ArrayPlotData, gray
 from traitsui.menu import MenuBar, Menu, Action
 from chaco.tools.api import  ZoomTool,PanTool
-from scipy.misc import imread
+from skimage.io import imread
+from skimage.color import rgb2gray
+from skimage import img_as_ubyte
 from threading import Thread
 from pyface.api import GUI
 
@@ -204,6 +205,11 @@ class CameraWindow (HasTraits):
         example usage:
             update_image(image,is_float=False)
         """
+        print image.shape, is_float
+        if image.ndim > 2:
+            image = img_as_ubyte(rgb2gray(image))
+            is_float = False
+        
         if is_float:
             self._plot_data.set_data('imagedata',image.astype(np.float))
         else:
@@ -503,12 +509,12 @@ class TreeMenuHandler (Handler):
         mainGui.exp1.syncActiveDir() #synchronize the active run params dir with the temp params dir
         
         for i in range (0,len(mainGui.camera_list)):
-            exec("mainGui.orig_image[%d]=imread(mainGui.exp1.active_params.m_params.Name_%d_Image).astype(np.ubyte)" %(i,i+1))
+            exec("mainGui.orig_image[%d]=img_as_ubyte(imread(mainGui.exp1.active_params.m_params.Name_%d_Image))" %(i,i+1))
             if hasattr(mainGui.camera_list[i],'_img_plot'):
                 del mainGui.camera_list[i]._img_plot
         mainGui.clear_plots()
         print("\nInit action\n")
-        mainGui.update_plots(mainGui.orig_image,is_float=1)
+        mainGui.update_plots(mainGui.orig_image,is_float=False)
         mainGui.set_images(mainGui.orig_image)
        
         ptv.py_start_proc_c()
@@ -581,7 +587,7 @@ class TreeMenuHandler (Handler):
                     img_name=base_name[j]+seq_ch
                     print ("Setting image: %s" % img_name)
                     try:
-                        temp_img=imread(img_name).astype(np.ubyte)
+                        temp_img = img_as_ubyte(imread(img_name))
                     except:
                         print "Error reading file"
                            
@@ -653,7 +659,7 @@ class TreeMenuHandler (Handler):
             2) ptv.py_get_mark_track_c(..)
         """
         info.object.clear_plots(remove_background=False) #clear everything
-        info.object.update_plots(info.object.orig_image,is_float=1)
+        info.object.update_plots(info.object.orig_image,is_float=False)
         
         prm = info.object.exp1.active_params.m_params
         seq_first = prm.Seq_First #get sequence parameters
@@ -970,7 +976,9 @@ class MainGUI (HasTraits):
                     for j in range(len(self.camera_list)):
                         if j is not n_camera:
                             count=self.camera_list[i]._plot.plots.keys()
-                            self.camera_list[j].drawline("right_cl_x"+str(len(count)),"right_cl_y"+str(len(count)),x1[j],y1[j],x2[j],y2[j],color_camera[n_camera])
+                            self.camera_list[j].drawline("right_cl_x"+str(len(count)),\
+                            "right_cl_y"+str(len(count)),x1[j],y1[j],x2[j],y2[j],\
+                            color_camera[n_camera])
                             self.camera_list[j]._plot.index_mapper.range.set_bounds(0,h_img)
                             self.camera_list[j]._plot.value_mapper.range.set_bounds(0,v_img)
                             self.camera_list[j].drawcross("right_p_x1","right_p_y1",x1_points[j],y1_points[j],\
@@ -981,7 +989,7 @@ class MainGUI (HasTraits):
                 self.camera_list[i].rclicked=0
 
    
-    def update_plots(self,images,is_float=0):
+    def update_plots(self,images,is_float=False):
         for i in range(len(images)):
             self.camera_list[i].update_image(images[i],is_float)
             self.camera_list[i]._plot.request_redraw()
@@ -1083,11 +1091,11 @@ class MainGUI (HasTraits):
         print ("Setting image: %s" % str(img_name))
         temp_img=np.array([],dtype=np.ubyte)
         try:
-            temp_img=imread(img_name).astype(np.ubyte)
+            temp_img = img_as_ubyte(imread(img_name))
             if not display_only:
                 ptv.py_set_img(temp_img,j)
             if len(temp_img)>0:
-                self.camera_list[j].update_image(temp_img,is_float=1)
+                self.camera_list[j].update_image(temp_img)
         except:
             print "Error reading file"
 

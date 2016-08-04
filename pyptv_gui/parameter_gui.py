@@ -8,7 +8,6 @@ from traitsui.api \
 from traitsui.menu \
     import Menu, Action, Separator
 
-
 from traits.etsconfig.api import ETSConfig
 
 if (ETSConfig.toolkit == 'wx'):

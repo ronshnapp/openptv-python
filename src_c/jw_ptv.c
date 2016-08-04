@@ -607,7 +607,6 @@ int calibration_proc_c (int sel)
             for (i = 0; i < cpar->num_cams; i++)
             {
                 memcpy(img0[i], img[i], imgsize);
-
             }
             
             /* target recognition */
