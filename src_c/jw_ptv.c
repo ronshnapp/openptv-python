@@ -673,8 +673,9 @@ int calibration_proc_c (int sel)
                 nfix = k;
                 
                 /* read initial guess orientation from the ori files, no add params */
-                read_ori (&Ex[i], &I[i], &G[i], img_ori0[i], &(ap[i]), 
+                UPDATE_CALIBRATION(i, &Ex[i], &I[i], &G[i], img_ori0[i], &(ap[i]),
                     img_addpar0[i], "addpar.raw");
+                rotation_matrix(&(Ex[i]));
                 
                 /* presenting detected points by back-projection */
                 just_plot (Ex[i], I[i], G[i], ap[i], nfix, fix, i, cpar);
