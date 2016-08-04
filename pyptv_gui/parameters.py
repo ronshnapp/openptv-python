@@ -169,7 +169,7 @@ class PtvParams(Parameters):
 #            for i in range(self.n_img):
             for i in range(max_camera):
                 self.img_name.append(g(f))
-                self.img_cal.append(g(f))
+                self.img_cal.append(g(f)+'.ori')
 
             for i in range(max_camera):
                 fname = self.img_name[i]
