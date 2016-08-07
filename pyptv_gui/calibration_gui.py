@@ -349,8 +349,6 @@ class calibration_gui(HasTraits):
         x=[]
         y=[]
         self.ptv.py_get_pix(x,y)
-        
-        self.update_plots(self.ori_img)
         self.drawcross("x","y",x,y,"blue",4)
         for i in range(len(self.camera)):
               self.camera[i]._right_click_avail=1
