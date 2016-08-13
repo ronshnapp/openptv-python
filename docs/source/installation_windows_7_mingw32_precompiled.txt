@@ -3,11 +3,11 @@ Installation of OpenPTV on Windows 7 and 8.1 using MinGW and pre-compiled librar
 ===================================================================================
 
 
-1. install mingw to C:\Mingw from http://www.mingw.org/
-   * run the installer
-   * select mingw-develop
-   * go to c:\mingw\msys\1.0\postinstall and run pi.bat (answer ‘y’ and type c:\mingw)
-   * run msys.bat from c:\mingw\msys\1.0
+1. install mingw to C:\Mingw from http://www.mingw.org/  
+   * run the installer  
+   * select ```mingw-develop```  
+   * go to ```c:\mingw\msys\1.0\postinstall``` and run pi.bat (answer ‘y’ and type c:\mingw)
+   * run ```msys.bat``` from ```c:\mingw\msys\1.0```
 2.      install Anaconda Python distribution with Python 2.7 and 32-bit http://continuum.io/downloads#all
    * open the shell (msys.bat) and use command line to install additional things::
       
