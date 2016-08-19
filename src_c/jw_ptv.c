@@ -243,7 +243,7 @@ int start_proc_c()
         strcpy (img_hp_name[i], cpar->img_base_name[i]);
         strcat (img_hp_name[i], "_hp");
         
-        strcpy (img_ori[i], img_cal[i]);  strcat (img_ori[i], ".ori");
+        strcpy (img_ori[i], img_cal[i]);  // strcat (img_ori[i], ".ori");
         strcpy (img_addpar[i], img_cal[i]); strcat (img_addpar[i],".addpar");
         
         /*  read orientation and additional parameters  */
