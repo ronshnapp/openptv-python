@@ -20,7 +20,7 @@ void tr_init(tracking_run *tr, char *seq_par_fname, char *tpar_fname,
     tr->tpar = read_track_par(tpar_fname);
     tr->vpar = read_volume_par(vpar_fname);
     tr->cpar = read_control_par(cpar_fname);
-    if (tr->cpar->num_cams < 3){
+    if (tr->cpar->num_cams < 4){ //awful hack until we revise openptv-python
         tr->seq_par = read_sequence_par(seq_par_fname, 4);
     } else {
         tr->seq_par = read_sequence_par(seq_par_fname, tr->cpar->num_cams);
