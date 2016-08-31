@@ -55,7 +55,7 @@ void prepare_eval (control_par *cpar, int *n_fix) {
     frame frm;
     frame_init(&frm, cpar->num_cams, MAX_TARGETS);
     
-    if (cpar->num_cams < 3){
+    if (cpar->num_cams < 4){
         seq_par = read_sequence_par("parameters/sequence.par", 4);
     } else {
         seq_par = read_sequence_par("parameters/sequence.par", cpar->num_cams);
@@ -123,7 +123,7 @@ void prepare_eval_shake(control_par *cpar) {
     frame frm;
     frame_init(&frm, cpar->num_cams, MAX_TARGETS);
     
-    if (cpar->num_cams < 3){
+    if (cpar->num_cams < 4){
         seq_par = read_sequence_par("parametes/sequence.par", 4);
     } else {
         seq_par = read_sequence_par("parameters/sequence.par", cpar->num_cams);
