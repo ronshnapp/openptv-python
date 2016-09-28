@@ -483,8 +483,8 @@ int calibration_proc_c (int sel)
     int prev, next; 
     int chfield;       		       	/* flag for field mode */
     
-    double resid_x[1000], resid_y[1000]; /* raw residuals */
-    int pixnr[1000]; /* Array for numbers of points used by the end 
+    double resid_x[10000], resid_y[10000]; /* raw residuals */
+    int pixnr[10000]; /* Array for numbers of points used by the end 
                         orientation. Waits for a redesign. */
     
     double dummy_float;
