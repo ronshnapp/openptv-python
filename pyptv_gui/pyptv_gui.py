@@ -1,4 +1,4 @@
-""" PyPTV_GUI is the GUI for the 3D-PTV (http://ptv.origo.ethz.ch) written in 
+""" PyPTV_GUI is the GUI for the 3D-PTV (http://ptv.origo.ethz.ch) written in
 Python/Enthought Traits GUI/Numpy/Chaco
 
 Copyright (c) 2008-2013, Tel Aviv University
@@ -7,15 +7,15 @@ The software is distributed under the terms of MIT-like license
 http://opensource.org/licenses/MIT
 
 """
-import os
-import sys
+import os, sys
+import time
 import numpy as np
 
 from traits.api \
     import HasTraits, Str, Int, List, Bool, Enum, Instance, Any
 from traitsui.api \
     import TreeEditor, TreeNode, View, Item, \
-            Handler, Group 
+            Handler, Group
 
 
 from enable.component_editor import ComponentEditor
@@ -37,18 +37,18 @@ if len(sys.argv) > 0:
     software_path = os.path.split(os.path.abspath(sys.argv[0]))[0]
 else:
     software_path = os.path.abspath(os.getcwd())
-    
-if not os.path.isdir(software_path):
-    print ("Wrong experimental directory %s " % software_path)  
 
-    
+if not os.path.isdir(software_path):
+    print ("Wrong experimental directory %s " % software_path)
+
+
 # Path to the experiment
 if len(sys.argv) > 1:
     exp_path = os.path.abspath(sys.argv[1])
     if not os.path.isdir(exp_path):
         print ("Wrong experimental directory %s " % exp_path)
 
-        
+
 # change directory to the software path
 try:
     os.chdir(software_path)
@@ -60,7 +60,7 @@ src_path = os.path.join(os.path.split(software_path)[0],'src_c')
 print 'src_path=', src_path
 if not os.path.isdir(src_path):
     print("Wrong src_c path %s" % src_path)
-sys.path.append(src_path) 
+sys.path.append(src_path)
 
 import ptv1 as ptv
 from optv.tracking_framebuf import read_targets
@@ -86,7 +86,7 @@ try:
 except:
     print('Wrong experimental directory %s' % exp_path)
 
-# 
+#
 class Clicker(ImageInspectorTool):
     """  Clicker class handles right mouse click actions from the tree and menubar actions
     """
@@ -120,11 +120,11 @@ class Clicker(ImageInspectorTool):
             # image_data=plot.value
             self.x=(x_index)
             self.y=(y_index)
-            
+
             self.right_changed=1-self.right_changed
             print self.x
             print self.y
-            
+
             self.last_mouse_position = (event.x, event.y)
         return
 
@@ -146,15 +146,15 @@ class CameraWindow (HasTraits):
     _plot=Instance(Plot)
     _click_tool=Instance(Clicker)
     rclicked=Int(0)
-    
+
     cam_color = ''
 
     name=Str
     view = View( Item(name='_plot',editor=ComponentEditor(), show_label=False) )
     # view = View( Item(name='_plot',show_label=False) )
-   
+
     def __init__(self, color):
-        """ Initialization of plot system 
+        """ Initialization of plot system
         """
         padd=25
         self._plot_data=ArrayPlotData()
@@ -180,7 +180,7 @@ class CameraWindow (HasTraits):
         self._img_plot.overlays.append(zoom_tool)
         self._img_plot.tools.append(pan)
 
-        
+
     def left_clicked_event(self): #TODO: why do we need the clicker_tool if we can handle mouse clicks here?
         """ left_clicked_event - processes left click mouse avents and displays coordinate and grey value information
         on the screen
@@ -196,7 +196,7 @@ class CameraWindow (HasTraits):
         #need to print cross and manage other camera's crosses
 
 
-    def update_image(self,image,is_float):
+    def update_image(self,image,is_float=False):
         """ update_image - displays/updates image in the curren camera window
         parameters:
             image - image data
@@ -209,18 +209,18 @@ class CameraWindow (HasTraits):
         if image.ndim > 2:
             image = img_as_ubyte(rgb2gray(image))
             is_float = False
-        
+
         if is_float:
             self._plot_data.set_data('imagedata',image.astype(np.float))
         else:
             self._plot_data.set_data('imagedata',image.astype(np.byte))
-       
+
         if not hasattr(self,'_img_plot'): #make a new plot if there is nothing to update
             self._img_plot=Instance(ImagePlot)
             self._img_plot=self._plot.img_plot('imagedata',colormap=gray)[0]
             self.attach_tools()
-            
-            
+
+
            # self._plot.request_redraw()
 
     def drawcross(self, str_x,str_y,x,y,color1,mrk_size,marker1="plus"):
@@ -253,7 +253,7 @@ class CameraWindow (HasTraits):
         example usage:
             drawquiver ([100,200],[100,100],[400,400],[300,200],'red',linewidth=2.0)
             draws 2 red lines with thickness = 2 :  100,100->400,300 and 200,100->400,200
-                    
+
         """
         x1,y1,x2,y2=self.remove_short_lines(x1c,y1c,x2c,y2c)
         if len(x1)>0:
@@ -269,9 +269,9 @@ class CameraWindow (HasTraits):
             self._plot.add(quiverplot)
             self._quiverplots.append(quiverplot) #we need this to track how many quiverplots are in the current plot
             # import pdb; pdb.set_trace()
-            
+
     def remove_short_lines(self,x1,y1,x2,y2):
-        """ removes short lines from the array of lines 
+        """ removes short lines from the array of lines
         parameters:
             x1,y1,x2,y2 - start and end coordinates of the lines
         returns:
@@ -291,7 +291,7 @@ class CameraWindow (HasTraits):
                 x2f.append(x2[i])
                 y2f.append(y2[i])
         return x1f,y1f,x2f,y2f
-                
+
     def drawline(self,str_x,str_y,x1,y1,x2,y2,color1):
         """ drawline draws 1 line on the screen by using lineplot x1,y1->x2,y2
         parameters:
@@ -306,7 +306,7 @@ class CameraWindow (HasTraits):
         self._plot_data.set_data(str_x,[x1,x2])
         self._plot_data.set_data(str_y,[y1,y2])
         self._plot.plot((str_x,str_y),type="line",color=color1)
-        #self._plot.request_redraw()       
+        #self._plot.request_redraw()
 
 
 class TrackThread(Thread):
@@ -317,12 +317,11 @@ class TrackThread(Thread):
         run_info = ptv.py_trackcorr_init() #init the relevant C function
         for step in range(*run_info.get_sequence_range()): #Loop over each step in sequence
             self.track_step=step
-            
+
             #Call C function to process current step and store results for plotting
             self.intx0, self.intx1, self.intx2, self.inty0, self.inty1, \
                 self.inty2, self.pnr1, self.pnr2, self.pnr3, self.m_tr = \
                 ptv.py_trackcorr_loop(run_info, step, display=1)
-
             self.can_continue=False
             GUI.invoke_later(setattr, main_gui, 'update_thread_plot', True) #invoke plotting when system is ready to process it
             while not self.can_continue: # wait while plotting of the current step is finished, then continue for the next step
@@ -332,7 +331,7 @@ class TrackThread(Thread):
         ptv.py_trackcorr_finish(run_info, step + 1) # call finishing C function (after all the steps in the loop are processed)
         for i in range(len(main_gui.camera_list)): # refresh cameras
             main_gui.camera_list[i]._plot.request_redraw()
-        
+
         print "tracking with display thread finished"
 
 class TreeMenuHandler (Handler):
@@ -345,7 +344,7 @@ class TreeMenuHandler (Handler):
                 To access parent class objects use info.object, for example info.object.exp1 gives access to exp1 member of main_gui class
         2) to process tree editor actions:
             def function(self,editor,object) - see examples below
-                    
+
     """
     def configure_main_par(self, editor, object):
         experiment = editor.get_parent(object)
@@ -357,8 +356,8 @@ class TreeMenuHandler (Handler):
         else:
             paramset.m_params._reload()
         paramset.m_params.edit_traits(kind='modal')
-        
-        
+
+
     def configure_cal_par(self, editor, object):
         experiment = editor.get_parent(object)
         paramset = object
@@ -369,7 +368,7 @@ class TreeMenuHandler (Handler):
         else:
             paramset.c_params._reload()
         paramset.c_params.edit_traits(kind='modal')
-        
+
     def configure_track_par(self, editor, object):
         experiment = editor.get_parent(object)
         paramset = object
@@ -378,7 +377,7 @@ class TreeMenuHandler (Handler):
             #TODO: is it possible that control reaches here? If not, probably the if should be removed.
             paramset.t_params=Tracking_Params()
         paramset.t_params.edit_traits(kind='modal')
-        
+
     def set_active(self, editor, object):
         experiment = editor.get_parent(object)
         paramset = object
@@ -386,7 +385,7 @@ class TreeMenuHandler (Handler):
         experiment.setActive(paramset)
         experiment.changed_active_params = True
         # editor.object.__init__()
-                
+
     def copy_set_params(self, editor, object):
         experiment = editor.get_parent(object)
         paramset = object
@@ -401,7 +400,7 @@ class TreeMenuHandler (Handler):
                 flag = True
             else:
                 i=i+1
-        
+
         os.mkdir(new_dir_path)
         par.copy_params_dir(paramset.par_path, new_dir_path)
         experiment.addParamset(new_name, new_dir_path)
@@ -422,9 +421,9 @@ class TreeMenuHandler (Handler):
         os.rmdir(paramset.par_path)
         experiment.removeParamset(paramset)
         experiment.addParamset(new_name, new_dir_path)
-        
+
     def delete_set_params(self, editor, object):
-        """ delete_set_params deletes the node and the folder of parameters 
+        """ delete_set_params deletes the node and the folder of parameters
         """
         # experiment = editor.get_parent(object)
         paramset = object
@@ -441,7 +440,7 @@ class TreeMenuHandler (Handler):
     #------------------------------------------
     def new_action(self,info):
         print("Not implemented")
-        
+
     def open_action(self,info):
         directory_dialog = DirectoryEditorDialog()
         directory_dialog.edit_traits()
@@ -449,18 +448,18 @@ class TreeMenuHandler (Handler):
         print "Changing experimental path to %s" % exp_path
         os.chdir(exp_path)
         info.object.exp1.populate_runs(exp_path)
-        
+
     def exit_action(self,info):
         print ("not implemented yet")
-        
+
     def saveas_action(self,info):
         print ("not implemented yet")
-        
+
     def showimg_action(self,info):
         print "not implemented"
-        
+
         info.object.update_plots(info.object.orig_image)
-         
+
     def highpass_action(self,info):
         """ highpass_action - calls ptv.py_pre_processing_c() binding which does highpass on working images (object.orig_image)
         that were set with init action
@@ -482,7 +481,7 @@ class TreeMenuHandler (Handler):
         ptv.py_get_pix(x,y) # extract detected points from C with help of py_get_pix binding
         info.object.drawcross("x","y",x,y,"blue",3)
 
-           
+
     def corresp_action(self,info):
         """ corresp_action - calls ptv.py_correspondences_proc_c(quadriplets,triplets,pairs, unused) binding.
         Result of correspondence action is filled to uadriplets,triplets,pairs, unused arrays
@@ -502,12 +501,12 @@ class TreeMenuHandler (Handler):
 
     def init_action(self,info):
         """ init_action - clears existing plots from the camera windows,
-        initializes C image arrays with mainGui.orig_image and 
+        initializes C image arrays with mainGui.orig_image and
         calls appropriate start_proc_c by using ptv.py_start_proc_c()
         """
         mainGui = info.object
         mainGui.exp1.syncActiveDir() #synchronize the active run params dir with the temp params dir
-        
+
         for i in range (0,len(mainGui.camera_list)):
             exec("mainGui.orig_image[%d]=img_as_ubyte(imread(mainGui.exp1.active_params.m_params.Name_%d_Image))" %(i,i+1))
             if hasattr(mainGui.camera_list[i],'_img_plot'):
@@ -516,15 +515,15 @@ class TreeMenuHandler (Handler):
         print("\nInit action\n")
         mainGui.update_plots(mainGui.orig_image,is_float=False)
         mainGui.set_images(mainGui.orig_image)
-       
+
         ptv.py_start_proc_c()
         mainGui.pass_init=True
         print ("done")
-             
-         
-     
+
+
+
     def calib_action(self,info):
-        """ calib_action - initializes calib class with appropriate number of plot windows, 
+        """ calib_action - initializes calib class with appropriate number of plot windows,
         passes to calib class pointer to ptv module and to exp1 class,
         invokes the calibration GUI
         """
@@ -541,12 +540,12 @@ class TreeMenuHandler (Handler):
                 mainGui.calib.camera[i].cameraN=i
                 mainGui.calib.camera[i].py_rclick_delete=ptv.py_rclick_delete
                 mainGui.calib.camera[i].py_get_pix_N=ptv.py_get_pix_N
-                
-   
+
+
         mainGui.calib.ptv=ptv
         mainGui.calib.exp1=mainGui.exp1 #pass all the parameters to calib class
-        mainGui.calib.configure_traits()  
-   
+        mainGui.calib.configure_traits()
+
     def sequence_action(self,info):
         """sequence action - implements binding to C sequence function. Original function was split into 2 parts:
             1) initialization - binded by ptv.py_sequence_init(..) function
@@ -572,12 +571,12 @@ class TreeMenuHandler (Handler):
             for i in range (n_camera):
                 exec("base_name.append(info.object.exp1.active_params.m_params.Basename_%d_Seq)" %(i+1))
                 print base_name[i]
-       
+
             ptv.py_sequence_init(0) #init C sequence function
             stepshake=ptv.py_get_from_sequence_init() #get parameters and pass to main loop
             if not stepshake:
                 stepshake=1
-            
+
             print stepshake
             temp_img=np.array([],dtype=np.ubyte)
             # main loop - format image name, read it and call v.py_sequence_loop(..) for current step
@@ -590,9 +589,9 @@ class TreeMenuHandler (Handler):
                         temp_img = img_as_ubyte(imread(img_name))
                     except:
                         print "Error reading file"
-                           
+
                     ptv.py_set_img(temp_img,j)
-                    
+
                 ptv.py_sequence_loop(0,i)
         else:
             print "Sequence by using "+extern_sequence
@@ -602,7 +601,7 @@ class TreeMenuHandler (Handler):
 
     def track_no_disp_action(self, info):
         """ track_no_disp_action uses ptv.py_trackcorr_loop(..) binding to call tracking without display
-        """                
+        """
         extern_tracker=info.object.plugins.track_alg
         if extern_tracker!='default':
             try:
@@ -620,17 +619,17 @@ class TreeMenuHandler (Handler):
             for step in range(*run_info.get_sequence_range()):
                 print step
                 ptv.py_trackcorr_loop(run_info, step, display=0)
-            
+
             #finalize tracking
             ptv.py_trackcorr_finish(run_info, step + 1)
         else:
             print "Tracking by using "+extern_tracker
             tracker=track.Tracking(ptv=ptv, exp1=info.object.exp1)
             tracker.do_tracking()
-            
-            
+
+
         print "tracking without display finished"
-     
+
     def track_disp_action(self,info):
         """ tracking with display is handled by TrackThread which does processing step by step and
         waits for GUI to update before procceeding to the next step
@@ -644,15 +643,15 @@ class TreeMenuHandler (Handler):
         """
         print ("Starting back tracking")
         ptv.py_trackback_c()
-           
+
     def threed_positions(self,info):
         ptv.py_determination_proc_c(0)
-   
-        def multigrid_demo(self,info):
-                demo_window=DemoGUI(ptv=ptv, exp1=info.object.exp1)
-                demo_window.configure_traits()
-                
-   
+
+    def multigrid_demo(self,info):
+        demo_window=DemoGUI(ptv=ptv, exp1=info.object.exp1)
+        demo_window.configure_traits()
+
+
     def detect_part_track(self, info):
         """ track detected particles is handled by 2 bindings:
             1) tracking_framebuf.read_targets(..)
@@ -660,13 +659,13 @@ class TreeMenuHandler (Handler):
         """
         info.object.clear_plots(remove_background=False) #clear everything
         info.object.update_plots(info.object.orig_image,is_float=False)
-        
+
         prm = info.object.exp1.active_params.m_params
         seq_first = prm.Seq_First #get sequence parameters
         seq_last = prm.Seq_Last
-        base_names = [prm.Basename_1_Seq, prm.Basename_2_Seq, 
+        base_names = [prm.Basename_1_Seq, prm.Basename_2_Seq,
             prm.Basename_3_Seq, prm.Basename_4_Seq]
-        
+
         info.object.load_set_seq_image(seq_first) #load first seq image and set appropriate C array
         n_images=len(info.object.camera_list)
         print "Starting detect_part_track"
@@ -676,24 +675,24 @@ class TreeMenuHandler (Handler):
             x2_a.append([])
             y1_a.append([])
             y2_a.append([])
-        
+
         for i_seq in range(seq_first, seq_last+1): #loop over sequences
             for i_img in range(n_images):
                 intx_green,inty_green,intx_blue,inty_blue=[],[],[],[]
                 imx, imy, zoomx, zoomy, zoomf = ptv.py_get_mark_track_c(i_img)
                 targets = read_targets(base_names[i_img], i_seq)
-                
+
                 for h in range(len(targets)):
                     #get data from C
                     tx, ty = targets[h].pos()
-                    
+
                     if (targets[h].tnr() > -1):
                         intx_green.append(int(imx/2 + zoomf*(tx - zoomx)))
                         inty_green.append(int(imy/2 + zoomf*(ty - zoomy)))
                     else:
                         intx_blue.append(int(imx/2 + zoomf*(tx - zoomx)))
                         inty_blue.append(int(imy/2 + zoomf*(ty - zoomy)))
-            
+
                 x1_a[i_img]=x1_a[i_img]+intx_green # add current step to result array
                 x2_a[i_img]=x2_a[i_img]+intx_blue
                 y1_a[i_img]=y1_a[i_img]+inty_green
@@ -705,7 +704,7 @@ class TreeMenuHandler (Handler):
             info.object.camera_list[i_img].drawcross("x_tr_gr","y_tr_gr",x1_a[i_img],y1_a[i_img],"green",3)
             info.object.camera_list[i_img].drawcross("x_tr_bl","y_tr_bl",x2_a[i_img],y2_a[i_img],"blue",2)
             info.object.camera_list[i_img]._plot.request_redraw()
-                                     
+
         print "Finished detect_part_track"
 
     def traject_action(self,info):
@@ -719,7 +718,7 @@ class TreeMenuHandler (Handler):
         info.object.load_set_seq_image(seq_first,display_only=True)
         n_camera=len(info.object.camera_list)
         x1_a,x2_a,y1_a,y2_a=[],[],[],[]
-        for i in range (n_camera): #initialize result arrays 
+        for i in range (n_camera): #initialize result arrays
             x1_a.append([])
             x2_a.append([])
             y1_a.append([])
@@ -847,10 +846,10 @@ tree_editor_exp=TreeEditor(
                                 SetAsDefault
                                 )
                 )
-               
+
         ],
         editable = False,
-               
+
 )
 # -------------------------------------------------------------------------
 class Plugins (HasTraits):
@@ -888,7 +887,7 @@ class Plugins (HasTraits):
             f.close()
         except:
             self.seq_list=['default']
-        
+
 # ----------------------------------------------
 class MainGUI (HasTraits):
     """ MainGUI is the main class under which the Model-View-Control (MVC) model is defined
@@ -899,7 +898,7 @@ class MainGUI (HasTraits):
     update_thread_plot=Bool(False)
     tr_thread=Instance(TrackThread)
     selected = Any
-    
+
     # Defines GUI view --------------------------
     view = View(
                 Group(
@@ -922,11 +921,11 @@ class MainGUI (HasTraits):
                 menubar=menu_bar)
 
 
-   
+
     def _selected_changed(self):
         self.current_camera=int(self.selected.name.split(' ')[1])-1
-       
-       
+
+
     #---------------------------------------------------
     # Constructor and Chaco windows initialization
     #---------------------------------------------------
@@ -949,7 +948,7 @@ class MainGUI (HasTraits):
             self.orig_image.append(np.array([],dtype=np.ubyte))
             self.hp_image.append(np.array([]))
         ptv.py_init_proc_c() #intialization of globals in ptv C module
-           
+
     #------------------------------------------------------
     def right_click_process(self):
         x_clicked,y_clicked,n_camera=0,0,0
@@ -957,7 +956,7 @@ class MainGUI (HasTraits):
         v_img=self.exp1.active_params.m_params.imy
         print h_img,v_img
         for i in range(len(self.camera_list)):
-            
+
                 n_camera=i
                 x_clicked,y_clicked=self.camera_list[i]._click_tool.x,\
                                     self.camera_list[i]._click_tool.y
@@ -988,7 +987,7 @@ class MainGUI (HasTraits):
                     print ("No nearby points for epipolar lines")
                 self.camera_list[i].rclicked=0
 
-   
+
     def update_plots(self,images,is_float=False):
         for i in range(len(images)):
             self.camera_list[i].update_image(images[i],is_float)
@@ -1007,15 +1006,15 @@ class MainGUI (HasTraits):
         for i in range(len(self.camera_list)):
             self.camera_list[i].drawcross(str_x,str_y,x[i],y[i],color1,size1)
             self.camera_list[i]._plot.request_redraw()
-                   
+
     def clear_plots(self,remove_background=True):
         # this function deletes all plotes except basic image plot
-   
+
         if not remove_background:
             index='plot0'
         else:
             index=None
-           
+
         for i in range(len(self.camera_list)):
             plot_list=self.camera_list[i]._plot.plots.keys()
             #if not remove_background:
@@ -1034,15 +1033,15 @@ class MainGUI (HasTraits):
             self.camera_list[i].right_p_y0=[]
             self.camera_list[i].right_p_x1=[]
             self.camera_list[i].right_p_y1=[]
-                    
-   
+
+
     def _update_thread_plot_changed(self):
         n_camera=len(self.camera_list)
-       
+
         if self.update_thread_plot and self.tr_thread:
             print "updating plots..\n"
             step=self.tr_thread.track_step
-           
+
             x0,x1,x2,y0,y1,y2,pnr1,pnr2,pnr3,m_tr=\
             self.tr_thread.intx0,self.tr_thread.intx1,self.tr_thread.intx2,\
             self.tr_thread.inty0,self.tr_thread.inty1,self.tr_thread.inty2,self.tr_thread.pnr1,\
@@ -1055,13 +1054,14 @@ class MainGUI (HasTraits):
                 self.camera_list[i].drawquiver(x1[i],y1[i],x2[i],y2[i],"white")
 ##                for j in range (m_tr):
 ##                    str_plt=str(step)+"_"+str(j)
-##                    
+##
 ##                    self.camera_list[i].drawline\
 ##                    (str_plt+"vec_x0",str_plt+"vec_y0",x0[i][j],y0[i][j],x1[i][j],y1[i][j],"orange")
 ##                    self.camera_list[i].drawline\
 ##                    (str_plt+"vec_x1",str_plt+"vec_y1",x1[i][j],y1[i][j],x2[i][j],y2[i][j],"white")
             self.load_set_seq_image(step,update_all=False,display_only=True)
             self.camera_list[self.current_camera]._plot.request_redraw()
+            time.sleep(0.1)
             self.tr_thread.can_continue=True
             self.update_thread_plot=False
 
@@ -1089,19 +1089,19 @@ class MainGUI (HasTraits):
 
     def load_disp_image(self, img_name,j,display_only=False):
         print ("Setting image: %s" % str(img_name))
-        temp_img=np.array([],dtype=np.ubyte)
         try:
             temp_img = img_as_ubyte(imread(img_name))
-            if not display_only:
-                ptv.py_set_img(temp_img,j)
-            if len(temp_img)>0:
-                self.camera_list[j].update_image(temp_img)
         except:
             print "Error reading file"
+        if not display_only:
+            ptv.py_set_img(temp_img,j)
+        if len(temp_img)>0:
+            self.camera_list[j].update_image(temp_img)
 
 
-           
-# -------------------------------------------------------------    
+
+
+# -------------------------------------------------------------
 if __name__ == '__main__':
     try:
         main_gui = MainGUI()
@@ -1110,5 +1110,5 @@ if __name__ == '__main__':
     except:
         print("something wrong with the software or folder")
         general.printException()
-    
+
     os.chdir(cwd) #get back to the original workdir
