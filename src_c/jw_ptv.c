@@ -594,10 +594,10 @@ int calibration_proc_c (int sel)
             
         case 2: // puts ("Detection procedure"); strcpy(val,"");
             
-            printf("Detection procedure\n");
+            printf("Detection procedure (without highpass, clean up your images) \n");
             
-            /* Highpass Filtering */
-            pre_processing_c (chfield);
+            /* Highpass Filtering is removed - edited pics do not work with the highpass */
+            // pre_processing_c (chfield);
             
             /* reset zoom values */
             for (i = 0; i < cpar->num_cams; i++)
