@@ -5,15 +5,13 @@ The software is distributed under the terms of MIT-like license
 http://opensource.org/licenses/MIT
 """
 from traits.api \
-    import HasTraits, Str, Float, Int, List, Bool, Enum, Instance, Button, File
+    import HasTraits, Str, Int, List, Bool, Instance, Button
 from traitsui.api \
-    import View, Item, VSplit, \
-    HGroup, Handler, Group, VGroup, HGroup, Tabbed, ListEditor
+    import View, Item, HGroup, VGroup, ListEditor
 from enable.component_editor import ComponentEditor
-from chaco.api import Plot, ArrayPlotData, gray,    ImageData, \
-    ImagePlot, CMapImagePlot, ArrayDataSource, MultiArrayDataSource,\
-    LinearMapper
-from traitsui.menu import MenuBar, ToolBar, Menu, Action
+from chaco.api import Plot, ArrayPlotData, gray, \
+    ImagePlot, ArrayDataSource, LinearMapper
+# from traitsui.menu import MenuBar, ToolBar, Menu, Action
 from chaco.tools.image_inspector_tool import ImageInspectorTool
 from chaco.tools.simple_zoom import SimpleZoom
 from text_box_overlay import TextBoxOverlay
@@ -21,8 +19,7 @@ from scipy.misc import imread
 import os
 import sys
 import shutil
-from scipy.misc import imread
-from code_editor import *
+from code_editor import codeEditor
 import numpy as np
 
 from quiverplot import QuiverPlot
@@ -177,7 +174,7 @@ class plot_window (HasTraits):
         self._plot.plot((str_x, str_y), type="line", color=color1)
         self._plot.request_redraw()
 
-    def drawquiver(self, x1c, y1c, x2c, y2c, color, linewidth=1.0):
+    def drawquiver(self, x1c, y1c, x2c, y2c, color, linewidth=1.0, scale=1.0):
         """ drawquiver draws multiple lines at once on the screen x1,y1->x2,y2 in the current camera window
         parameters:
             x1c - array of x1 coordinates
@@ -191,7 +188,7 @@ class plot_window (HasTraits):
             draws 2 red lines with thickness = 2 :  100,100->400,300 and 200,100->400,200
 
         """
-        x1, y1, x2, y2 = self.remove_short_lines(x1c, y1c, x2c, y2c)
+        x1, y1, x2, y2 = self.remove_short_lines(x1c, y1c, x2c, y2c, min_length=0)
         if len(x1) > 0:
             xs = ArrayDataSource(x1)
             ys = ArrayDataSource(y1)
@@ -202,7 +199,9 @@ class plot_window (HasTraits):
                                     value_mapper=LinearMapper(
                                         range=self._plot.value_mapper.range),
                                     origin=self._plot.origin, arrow_size=0,
-                                    line_color=color, line_width=linewidth, ep_index=np.array(x2), ep_value=np.array(y2)
+                                    line_color=color, line_width=linewidth, 
+                                    ep_index=np.array(x2)*scale, 
+                                    ep_value=np.array(y2)*scale
                                     )
             self._plot.add(quiverplot)
             # we need this to track how many quiverplots are in the current
@@ -210,7 +209,7 @@ class plot_window (HasTraits):
             self._quiverplots.append(quiverplot)
             # import pdb; pdb.set_trace()
 
-    def remove_short_lines(self, x1, y1, x2, y2):
+    def remove_short_lines(self, x1, y1, x2, y2, min_length=2):
         """ removes short lines from the array of lines
         parameters:
             x1,y1,x2,y2 - start and end coordinates of the lines
@@ -222,10 +221,10 @@ class plot_window (HasTraits):
             returned coordinates:
             x1=[200,300]; y1=[200,300]; x2=[200,300]; y2=[210,320]
         """
-        dx, dy = 2, 2  # minimum allowable dx,dy
+        # dx, dy = 2, 2  # minimum allowable dx,dy
         x1f, y1f, x2f, y2f = [], [], [], []
         for i in range(len(x1)):
-            if abs(x1[i] - x2[i]) > dx or abs(y1[i] - y2[i]) > dy:
+            if abs(x1[i] - x2[i]) > min_length or abs(y1[i] - y2[i]) > min_length:
                 x1f.append(x1[i])
                 y1f.append(y1[i])
                 x2f.append(x2[i])
@@ -467,12 +466,14 @@ class calibration_gui(HasTraits):
         y1_cyan = []
         pnr = []
         self.ptv.py_get_from_sortgrid(x, y, pnr)
+        
         # filter out -999 which is returned for the missing points:
-        while -999 in x[0]:
-            id = x[0].index(-999)
-            del x[0][id]
-            del y[0][id]
-            del pnr[0][id]
+        for i in range(len(self.camera)):
+            while -999 in x[i]:
+                id = x[i].index(-999)
+                del x[i][id]
+                del y[i][id]
+                del pnr[i][id]
 
         self.drawcross("sort_x", "sort_y", x, y, "white", 4)
         self.ptv.py_get_from_calib(x1_cyan, y1_cyan)
@@ -519,7 +520,7 @@ class calibration_gui(HasTraits):
                 'imagedata', self.ori_img[i].astype(np.float))
             self.camera[i]._img_plot = self.camera[
                 i]._plot.img_plot('imagedata', colormap=gray)[0]
-            self.camera[i].drawquiver(x1[i], y1[i], x2[i], y2[i], "red")
+            self.camera[i].drawquiver(x1[i], y1[i], x2[i], y2[i], "red",scale=10.0)
             self.camera[i]._plot.index_mapper.range.set_bounds(0, self.h_pixel)
             self.camera[i]._plot.value_mapper.range.set_bounds(0, self.v_pixel)
 
@@ -625,7 +626,7 @@ class calibration_gui(HasTraits):
         man_ori_path = os.path.join(os.getcwd(), 'parameters', 'man_ori.par')
         f = open(man_ori_path, 'r')
         if f is None:
-            printf('\nError loading man_ori.par')
+            print('\n Error loading man_ori.par')
         else:
             for i in range(len(self.camera)):
                 for j in range(4):
