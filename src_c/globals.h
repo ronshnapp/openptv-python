@@ -1,13 +1,12 @@
 /*  global declarations for ptv  */
+#ifndef GLOBALS_H
+#define GLOBALS_H
 
 #include "tracking_run.h"
 #include "typedefs.h"
 #include <optv/tracking_frame_buf.h>
 #include <optv/calibration.h>
 #include <stdio.h>
-
-#ifndef GLOBALS_H
-#define GLOBALS_H
 
 #define nmax 20240
 
@@ -79,7 +78,7 @@ extern Exterior Ex[];       /* exterior orientation */ //previous -  Exterior  E
 extern Interior I[];        /* interior orientation *///previous -  Exterior  I[];
 extern Glass    G[];        /* glass orientation *///previous -  Exterior  G[];
 extern ap_52    ap[];       /* add. parameters *///previous -  Exterior  ap[];
-Calibration glob_cal[4];  // Collect all the globals until it is safe to remove them.
+extern Calibration glob_cal[4];  // Collect all the globals until it is safe to remove them.
 
 extern target   pix[4][nmax];  	/* target pixel data */
 extern target   pix0[4][12];    /* pixel data for man_ori points */

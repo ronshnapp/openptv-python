@@ -1,7 +1,11 @@
-#TODO: check if OrientParams should contain Bools or Ints
-#TODO: change set() functions to either have no default values, or have None value signify 'no change to parameter'.
+# TODO: check if OrientParams should contain Bools or Ints
+# TODO: change set() functions to either have no default values, or have
+# None value signify 'no change to parameter'.
 
-import os, sys, traceback, shutil
+import os
+import sys
+import traceback
+import shutil
 # from traits.api import *
 # import pyface.api as pyfaceapi
 from traits.api \
@@ -9,99 +13,101 @@ from traits.api \
 
 import general
 
-#Next line is for debug (unbuffer stdout)
+# Next line is for debug (unbuffer stdout)
 #sys.stdout = sys.stderr
 
 
-#Temporary path for parameters (active run will be copied here)
+# Temporary path for parameters (active run will be copied here)
 temp_path = 'parameters'
-max_camera=4
+max_camera = 4
 
 g = lambda f: f.readline().strip()
 
-#Base class for all parameters classes
+# Base class for all parameters classes
+
+
 class Parameters(HasTraits):
-    #default path of the directory of the param files
+    # default path of the directory of the param files
     default_path = "parameters"
-    
-    def __init__(self, path = default_path):
+
+    def __init__(self, path=default_path):
         self.path = path
-    
-    #returns the name of the specific params file
+
+    # returns the name of the specific params file
     def filename(self):
         raise NotImplementedError()
-    
-    #returns the path to the specific params file
+
+    # returns the path to the specific params file
     def filepath(self):
         return os.path.join(self.path, self.filename())
 
-    #sets all variables of the param file (no actual writing to disk)
+    # sets all variables of the param file (no actual writing to disk)
     def set(self, *vars):
         raise NotImplementedError()
-    
-    #reads a param file and stores it in the object
+
+    # reads a param file and stores it in the object
     def read(self):
         raise NotImplementedError()
-        
-    #writes values from the object to a file
+
+    # writes values from the object to a file
     def write(self):
         raise NotImplementedError()
 
 
-#Print detailed error to the console and show the user a friendly error window
+# Print detailed error to the console and show the user a friendly error window
 def error(owner, msg):
     print "Exception caught, message: %s" % (msg)
     general.printException()
     pyfaceapi.error(owner, msg)
-    
+
+
 def warning(msg):
     print "Warning message: %s" % (msg)
 
 
-
-#Reads a parameters directory and returns a dictionary with all parameter objects
+# Reads a parameters directory and returns a dictionary with all parameter
+# objects
 def readParamsDir(par_path):
-    #get n_img from ptv.par
-    ptvParams = PtvParams(path = par_path)
+    # get n_img from ptv.par
+    ptvParams = PtvParams(path=par_path)
     ptvParams.read()
     n_img = ptvParams.n_img
     n_pts = 4
-    
-    ret = { PtvParams : ptvParams,
-            CalOriParams : CalOriParams(n_img, path = par_path),
-            SequenceParams : SequenceParams(n_img, path = par_path),
-            CriteriaParams : CriteriaParams(path = par_path),
-            TargRecParams : TargRecParams(n_img, path = par_path),
-            ManOriParams : ManOriParams(n_img, n_pts, path = par_path),
-            DetectPlateParams : DetectPlateParams(path = par_path),
-            OrientParams : OrientParams(path = par_path),
-            TrackingParams : TrackingParams(path = par_path),
-            PftVersionParams : PftVersionParams(path = par_path),
-            ExamineParams : ExamineParams(path = par_path),
-            DumbbellParams : DumbbellParams(path = par_path),
-            ShakingParams : ShakingParams(path = par_path)
-            }
-    
+
+    ret = {PtvParams: ptvParams,
+           CalOriParams: CalOriParams(n_img, path=par_path),
+           SequenceParams: SequenceParams(n_img, path=par_path),
+           CriteriaParams: CriteriaParams(path=par_path),
+           TargRecParams: TargRecParams(n_img, path=par_path),
+           ManOriParams: ManOriParams(n_img, n_pts, path=par_path),
+           DetectPlateParams: DetectPlateParams(path=par_path),
+           OrientParams: OrientParams(path=par_path),
+           TrackingParams: TrackingParams(path=par_path),
+           PftVersionParams: PftVersionParams(path=par_path),
+           ExamineParams: ExamineParams(path=par_path),
+           DumbbellParams: DumbbellParams(path=par_path),
+           ShakingParams: ShakingParams(path=par_path)
+           }
+
     for parType in ret.keys():
         if parType == PtvParams:
             continue
         parObj = ret[parType]
         parObj.read()
-    
+
     return ret
-    
+
 
 def copy_params_dir(src, dest):
-# solves problem of copying under .svn
+    # solves problem of copying under .svn
     # import pdb; pdb.set_trace()
     files = [f for f in os.listdir(src) if f.endswith('.par')]
     if not os.path.exists(dest):
         os.mkdir(dest)
-    print "copy from %s to %s" % (src,dest)
+    print "copy from %s to %s" % (src, dest)
     for f in files:
-        shutil.copyfile(os.path.abspath(os.path.join(src,f)),os.path.abspath(os.path.join(dest,f)))
-
-
+        shutil.copyfile(os.path.abspath(os.path.join(src, f)),
+                        os.path.abspath(os.path.join(dest, f)))
 
 
 ####### Specific parameter classes #######
@@ -109,32 +115,32 @@ def copy_params_dir(src, dest):
 class PtvParams(Parameters):
     """ ptv.par
         ptv.par:        main parameter file
-        4       number of cameras 
-        cam3.100        image of first camera 
-        kal1    calibration data of first camera 
-        cam0.100        image of second camera 
+        4       number of cameras
+        cam3.100        image of first camera
+        kal1    calibration data of first camera
+        cam0.100        image of second camera
         kal3    calibration data of second camera
-        cam1.100        image of third camera 
-        kal4    calibration data of third camera 
-        cam2.100        image of fourth camera 
-        kal5    calibration data of fourth camera 
-        1       flag for highpass filtering, use (1) or not use (0) 
+        cam1.100        image of third camera
+        kal4    calibration data of third camera
+        cam2.100        image of fourth camera
+        kal5    calibration data of fourth camera
+        1       flag for highpass filtering, use (1) or not use (0)
         0               flag for using particles identified ONLY in all cameras (e.g. only quadruplets for 4 cameras)
-        1       flag for TIFF header (1) or raw data (0) 
-        720     image width in pixel 
-        576     image height in pixel 
-        0.009   pixel size horizontal [mm] 
-        0.0084  pixel size vertical [mm] 
-        0       flag for frame, odd or even fields 
-        1.0     refractive index air [no unit] 
-        1.5     refractive index glass [no unit] 
-        1.0     refractive index water [no unit] 
+        1       flag for TIFF header (1) or raw data (0)
+        720     image width in pixel
+        576     image height in pixel
+        0.009   pixel size horizontal [mm]
+        0.0084  pixel size vertical [mm]
+        0       flag for frame, odd or even fields
+        1.0     refractive index air [no unit]
+        1.5     refractive index glass [no unit]
+        1.0     refractive index water [no unit]
         9.4     thickness of glass [mm]
     """
-    
+
 #     n_img = Int
 #     img_name = List
-#     img_cal = List      
+#     img_cal = List
 #     hp_flag = Bool
 #     allCam_flag = Bool
 #     tiff_flag = Bool
@@ -148,19 +154,21 @@ class PtvParams(Parameters):
 #     mmp_n3 = Float
 #     mmp_d = Float
 
-    def __init__(self, n_img = Int, img_name = List, img_cal = List, hp_flag = Bool, allCam_flag = Bool, tiff_flag = Bool, imx = Int, imy = Int, pix_x = Float, pix_y = Float, chfield = Int, mmp_n1 = Float, mmp_n2 = Float, mmp_n3 = Float, mmp_d = Float, path = Parameters.default_path):
+    def __init__(self, n_img=Int, img_name=List, img_cal=List, hp_flag=Bool, allCam_flag=Bool, tiff_flag=Bool, imx=Int, imy=Int, pix_x=Float, pix_y=Float, chfield=Int, mmp_n1=Float, mmp_n2=Float, mmp_n3=Float, mmp_d=Float, path=Parameters.default_path):
         Parameters.__init__(self, path)
-        self.set(n_img, img_name, img_cal, hp_flag, allCam_flag, tiff_flag, imx, imy, pix_x, pix_y, chfield, mmp_n1, mmp_n2, mmp_n3, mmp_d)
+        self.set(n_img, img_name, img_cal, hp_flag, allCam_flag, tiff_flag,
+                 imx, imy, pix_x, pix_y, chfield, mmp_n1, mmp_n2, mmp_n3, mmp_d)
 
-    def set(self, n_img = Int, img_name = List, img_cal = List, hp_flag = Bool, allCam_flag = Bool, tiff_flag = Bool, imx = Int, imy = Int, pix_x = Float, pix_y = Float, chfield = Int, mmp_n1 = Float, mmp_n2 = Float, mmp_n3 = Float, mmp_d = Float):
+    def set(self, n_img=Int, img_name=List, img_cal=List, hp_flag=Bool, allCam_flag=Bool, tiff_flag=Bool, imx=Int, imy=Int, pix_x=Float, pix_y=Float, chfield=Int, mmp_n1=Float, mmp_n2=Float, mmp_n3=Float, mmp_d=Float):
         (self.n_img, self.img_name, self.img_cal, self.hp_flag, self.allCam_flag, self.tiff_flag, self.imx, self.imy, self.pix_x, self.pix_y, self.chfield, self.mmp_n1, self.mmp_n2, self.mmp_n3, self.mmp_d) = \
-            (n_img, img_name, img_cal, hp_flag, allCam_flag, tiff_flag, imx, imy, pix_x, pix_y, chfield, mmp_n1, mmp_n2, mmp_n3, mmp_d)
+            (n_img, img_name, img_cal, hp_flag, allCam_flag, tiff_flag,
+             imx, imy, pix_x, pix_y, chfield, mmp_n1, mmp_n2, mmp_n3, mmp_d)
 
     def filename(self):
         return "ptv.par"
-    
+
     def read(self):
-        #print "inside PtvParams.read"
+        # print "inside PtvParams.read"
         try:
             f = open(self.filepath(), 'r')
             self.n_img = int(g(f))
@@ -177,11 +185,11 @@ class PtvParams(Parameters):
                     warning("Error reading %s." % fname)
                 fname = self.img_cal[i]
                 if not os.path.isfile(fname):
-                    warning("Error reading %s." % fname)                    
-                
-            self.hp_flag = (int(g(f))!=0)
-            self.allCam_flag = (int(g(f))!=0)
-            self.tiff_flag = (int(g(f))!=0)
+                    warning("Error reading %s." % fname)
+
+            self.hp_flag = (int(g(f)) != 0)
+            self.allCam_flag = (int(g(f)) != 0)
+            self.tiff_flag = (int(g(f)) != 0)
             self.imx = int(g(f))
             self.imy = int(g(f))
             self.pix_x = float(g(f))
@@ -195,9 +203,9 @@ class PtvParams(Parameters):
             f.close()
         except:
             error(None, "Error reading %s." % self.filepath())
-        
+
     def write(self):
-        #print "inside PtvParams.write"
+        # print "inside PtvParams.write"
         try:
             f = open(self.filepath(), 'w')
             f.write("%d\n" % self.n_img)
@@ -231,16 +239,16 @@ class CalOriParams(Parameters):
     """
         cal_ori.par:    calibration plate, images, orientation files
         ptv/ssc_cal.c3d control point file (point number, X, Y, Z in [mm], ASCII
-        kal1    calibration 
-        kal1.ori    orientation 
-        kal3    calibration 
-        kal3.ori    orientation 
-        kal4    calibration 
-        kal4.ori    orientation 
-        kal5    calibration 
-        kal5.ori    orientation 
-        1   flag for TIFF header (1) or raw data (0) 
-        0   flag for pairs? 
+        kal1    calibration
+        kal1.ori    orientation
+        kal3    calibration
+        kal3.ori    orientation
+        kal4    calibration
+        kal4.ori    orientation
+        kal5    calibration
+        kal5.ori    orientation
+        1   flag for TIFF header (1) or raw data (0)
+        0   flag for pairs?
         0   flag for frame (0), odd (1) or even fields (2)
     """
 
@@ -251,36 +259,37 @@ class CalOriParams(Parameters):
 #     pair_flag = Bool
 #     chfield = Int
 
-    def __init__(self, n_img = Int, fixp_name = Str, img_cal_name = List, \
-    img_ori = List, tiff_flag = Bool, pair_flag = Bool, \
-    chfield = Int, path = Parameters.default_path):
+    def __init__(self, n_img=Int, fixp_name=Str, img_cal_name=List,
+                 img_ori=List, tiff_flag=Bool, pair_flag=Bool,
+                 chfield=Int, path=Parameters.default_path):
         Parameters.__init__(self, path)
-        self.set(n_img, fixp_name, img_cal_name, img_ori, tiff_flag, pair_flag, chfield)
-    
-    def set(self, n_img = Int, fixp_name = Str, img_cal_name = List, img_ori = List, tiff_flag = Bool, pair_flag = Bool, chfield = Int):
+        self.set(n_img, fixp_name, img_cal_name,
+                 img_ori, tiff_flag, pair_flag, chfield)
+
+    def set(self, n_img=Int, fixp_name=Str, img_cal_name=List, img_ori=List, tiff_flag=Bool, pair_flag=Bool, chfield=Int):
         self.n_img = n_img
         (self.fixp_name, self.img_cal_name, self.img_ori, self.tiff_flag, self.pair_flag, self.chfield) = \
             (fixp_name, img_cal_name, img_ori, tiff_flag, pair_flag, chfield)
-    
+
     def filename(self):
         return "cal_ori.par"
-        
+
     def read(self):
-        #print "inside CalOriParams.read"
+        # print "inside CalOriParams.read"
         try:
             f = open(self.filepath(), 'r')
 
             self.fixp_name = g(f)
             if not os.path.isfile(self.fixp_name):
                 error(None, "Error reading %s." % self.fixp_name)
-                
+
             self.img_cal_name = []
-            self.img_ori =[]
+            self.img_ori = []
 #            for i in range(self.n_img):
             for i in range(max_camera):
                 self.img_cal_name.append(g(f))
                 self.img_ori.append(g(f))
-                
+
             # test if files are present, protects from segfaults
             for i in range(max_camera):
                 fname = self.img_cal_name[i]
@@ -289,21 +298,21 @@ class CalOriParams(Parameters):
                 fname = self.img_ori[i]
                 if not os.path.isfile(fname):
                     warning("Error reading %s." % fname)
-                
-            self.tiff_flag = (int(g(f))!=0) # <-- overwrites the above
-            self.pair_flag = (int(g(f))!=0)
+
+            self.tiff_flag = (int(g(f)) != 0)  # <-- overwrites the above
+            self.pair_flag = (int(g(f)) != 0)
             self.chfield = int(g(f))
 
             f.close()
         except:
             error(None, "Error reading %s." % self.filepath())
-        
+
     def write(self):
-        #print "inside CalOriParams.write"
+        # print "inside CalOriParams.write"
         try:
             f = open(self.filepath(), 'w')
 
-            f.write("%s\n" % self.fixp_name) 
+            f.write("%s\n" % self.fixp_name)
 #            for i in range(self.n_img):
             for i in range(max_camera):
                 f.write("%s\n" % self.img_cal_name[i])
@@ -312,14 +321,14 @@ class CalOriParams(Parameters):
             f.write("%d\n" % self.tiff_flag)
             f.write("%d\n" % self.pair_flag)
             f.write("%d\n" % self.chfield)
-            
+
             f.close()
             return True
         except:
             error(None, "Error writing %s." % self.filepath())
             return False
 
-            
+
 class SequenceParams(Parameters):
     """
         sequence.par: sequence parameters
@@ -330,16 +339,16 @@ class SequenceParams(Parameters):
         100  first image of sequence
         119  last image of sequence
     """
-    
+
 #     base_name = List
 #     first = Int
 #     last = Int
-    
-    def __init__(self, n_img = Int, base_name = List, first = Int, last = Int, path = Parameters.default_path):
+
+    def __init__(self, n_img=Int, base_name=List, first=Int, last=Int, path=Parameters.default_path):
         Parameters.__init__(self, path)
         self.set(n_img, base_name, first, last)
-        
-    def set(self, n_img = Int, base_name = List, first = Int, last = Int):
+
+    def set(self, n_img=Int, base_name=List, first=Int, last=Int):
         self.n_img = n_img
         (self.base_name, self.first, self.last) = \
             (base_name, first, last)
@@ -348,39 +357,39 @@ class SequenceParams(Parameters):
         return "sequence.par"
 
     def read(self):
-        #print "inside SequenceParams.read"
+        # print "inside SequenceParams.read"
         try:
             f = open(self.filepath(), 'r')
-            self.base_name=[]
+            self.base_name = []
 #            for i in range(self.n_img):
             for i in range(max_camera):
                 self.base_name.append(g(f))
 
             self.first = int(g(f))
             self.last = int(g(f))
-            
+
             f.close()
         except:
             error(None, "Error reading %s." % self.filepath())
-        
+
     def write(self):
-        #print "inside SequenceParams.write"
+        # print "inside SequenceParams.write"
         try:
             f = open(self.filepath(), 'w')
-#            for i in range(self.n_img):           
+#            for i in range(self.n_img):
             for i in range(max_camera):
                 f.write("%s\n" % self.base_name[i])
 
             f.write("%d\n" % self.first)
             f.write("%d\n" % self.last)
-            
+
             f.close()
             return True
         except:
             error(None, "Error writing %s." % self.filepath())
             return False
 
-            
+
 class CriteriaParams(Parameters):
     """
         criteria.par:   object volume and correspondence parameters
@@ -390,11 +399,11 @@ class CriteriaParams(Parameters):
         10.0    illuminated layer data, xmax [mm]
         -10.0   illuminated layer data, zmin [mm]
         0.0     illuminated layer data, zmax [mm]
-        0.02    min corr for ratio nx 
-        0.02    min corr for ratio ny 
-        0.02    min corr for ratio npix 
-        0.02    sum of gv    
-        33      min for weighted correlation 
+        0.02    min corr for ratio nx
+        0.02    min corr for ratio ny
+        0.02    min corr for ratio npix
+        0.02    sum of gv
+        33      min for weighted correlation
         0.02    tolerance to epipolar line [mm]
     """
 
@@ -407,12 +416,12 @@ class CriteriaParams(Parameters):
 #     csumg = Float
 #     corrmin = Float
 #     eps0 = Float
-    
-    def __init__(self, X_lay = List, Zmin_lay = List, Zmax_lay = List, cnx = Float, cny = Float, cn = Float, csumg = Float, corrmin = Float, eps0 = Float, path = Parameters.default_path):
+
+    def __init__(self, X_lay=List, Zmin_lay=List, Zmax_lay=List, cnx=Float, cny=Float, cn=Float, csumg=Float, corrmin=Float, eps0=Float, path=Parameters.default_path):
         Parameters.__init__(self, path)
         self.set(X_lay, Zmin_lay, Zmax_lay, cnx, cny, cn, csumg, corrmin, eps0)
-        
-    def set(self, X_lay = List, Zmin_lay = List, Zmax_lay = List, cnx = Float, cny = Float, cn = Float, csumg = Float, corrmin = Float, eps0 = Float):
+
+    def set(self, X_lay=List, Zmin_lay=List, Zmax_lay=List, cnx=Float, cny=Float, cn=Float, csumg=Float, corrmin=Float, eps0=Float):
         (self.X_lay, self.Zmin_lay, self.Zmax_lay, self.cnx, self.cny, self.cn, self.csumg, self.corrmin, self.eps0) = \
             (X_lay, Zmin_lay, Zmax_lay, cnx, cny, cn, csumg, corrmin, eps0)
 
@@ -420,10 +429,10 @@ class CriteriaParams(Parameters):
         return "criteria.par"
 
     def read(self):
-        #print "inside CriteriaParams.read"
+        # print "inside CriteriaParams.read"
         try:
             f = open(self.filepath(), 'r')
-            
+
             self.X_lay = []
             self.Zmin_lay = []
             self.Zmax_lay = []
@@ -439,13 +448,13 @@ class CriteriaParams(Parameters):
             self.csumg = float(g(f))
             self.corrmin = float(g(f))
             self.eps0 = float(g(f))
-            
+
             f.close()
         except:
             error(None, "Error reading %s." % self.filepath())
-        
+
     def write(self):
-        #print "inside CriteriaParams.write"
+        # print "inside CriteriaParams.write"
         try:
             f = open(self.filepath(), 'w')
 
@@ -461,32 +470,32 @@ class CriteriaParams(Parameters):
             f.write("%g\n" % self.csumg)
             f.write("%g\n" % self.corrmin)
             f.write("%g\n" % self.eps0)
-            
+
             f.close()
             return True
         except:
             error(None, "Error writing %s." % self.filepath())
             return False
 
-            
+
 class TargRecParams(Parameters):
     """
         targ_rec.par:   parameters for particle detection
-        12      grey value threshold 1. image 
-        12      grey value threshold 2. image 
-        12      grey value threshold 3. image 
-        12      grey value threshold 4. image 
-        50      tolerable discontinuity in grey values 
-        25      min npix, area covered by particle 
+        12      grey value threshold 1. image
+        12      grey value threshold 2. image
+        12      grey value threshold 3. image
+        12      grey value threshold 4. image
+        50      tolerable discontinuity in grey values
+        25      min npix, area covered by particle
         400     max npix, area covered by particle
-        5       min npix in x, dimension in pixel 
-        20      max npix in x, dimension in pixel 
-        5       min npix in y, dimension in pixel 
-        20      max npix in y, dimension in pixel 
+        5       min npix in x, dimension in pixel
+        20      max npix in x, dimension in pixel
+        5       min npix in y, dimension in pixel
+        20      max npix in y, dimension in pixel
         100     sum of grey value
         1       size of crosses
     """
-        
+
 #     gvthres = List
 #     disco = Int
 #     nnmin = Int
@@ -497,24 +506,26 @@ class TargRecParams(Parameters):
 #     nymax = Int
 #     sumg_min = Int
 #     cr_sz = Int
-    
-    def __init__(self, n_img = Int, gvthres = List, disco = Int, nnmin = Int, nnmax = Int, nxmin = Int, nxmax = Int, nymin = Int, nymax = Int, sumg_min = Int, cr_sz = Int, path = Parameters.default_path):
+
+    def __init__(self, n_img=Int, gvthres=List, disco=Int, nnmin=Int, nnmax=Int, nxmin=Int, nxmax=Int, nymin=Int, nymax=Int, sumg_min=Int, cr_sz=Int, path=Parameters.default_path):
         Parameters.__init__(self, path)
-        self.set(n_img, gvthres, disco, nnmin, nnmax, nxmin, nxmax, nymin, nymax, sumg_min, cr_sz)
-        
-    def set(self, n_img = Int, gvthres = List, disco = Int, nnmin = Int, nnmax = Int, nxmin = Int, nxmax = Int, nymin = Int, nymax = Int, sumg_min = Int, cr_sz = Int):
+        self.set(n_img, gvthres, disco, nnmin, nnmax, nxmin,
+                 nxmax, nymin, nymax, sumg_min, cr_sz)
+
+    def set(self, n_img=Int, gvthres=List, disco=Int, nnmin=Int, nnmax=Int, nxmin=Int, nxmax=Int, nymin=Int, nymax=Int, sumg_min=Int, cr_sz=Int):
         self.n_img = n_img
         (self.gvthres, self.disco, self.nnmin, self.nnmax, self.nxmin, self.nxmax, self.nymin, self.nymax, self.sumg_min, self.cr_sz) = \
-            (gvthres, disco, nnmin, nnmax, nxmin, nxmax, nymin, nymax, sumg_min, cr_sz)
+            (gvthres, disco, nnmin, nnmax, nxmin,
+             nxmax, nymin, nymax, sumg_min, cr_sz)
 
     def filename(self):
         return "targ_rec.par"
 
     def read(self):
-        #print "inside TargRecParams.read"
+        # print "inside TargRecParams.read"
         try:
             f = open(self.filepath(), 'r')
-            
+
             self.gvthres = []
 #            for i in range(self.n_img):
             for i in range(max_camera):
@@ -533,15 +544,15 @@ class TargRecParams(Parameters):
             f.close()
         except:
             error(None, "Error reading %s." % self.filepath())
-        
+
     def write(self):
-        #print "inside TargRecParams.write"
+        # print "inside TargRecParams.write"
         try:
             f = open(self.filepath(), 'w')
 #            for i in range(self.n_img):
             for i in range(max_camera):
                 f.write("%d\n" % self.gvthres[i])
-                
+
             f.write("%d\n" % self.disco)
             f.write("%d\n" % self.nnmin)
             f.write("%d\n" % self.nnmax)
@@ -551,7 +562,7 @@ class TargRecParams(Parameters):
             f.write("%d\n" % self.nymax)
             f.write("%d\n" % self.sumg_min)
             f.write("%d\n" % self.cr_sz)
-            
+
             f.close()
             return True
         except:
@@ -562,43 +573,43 @@ class TargRecParams(Parameters):
 class ManOriParams(Parameters):
     """
         man_ori.par:    point number for manual pre-orientation
-        28      image 1 p1 on target plate (reference body) 
-        48      image 1 p2 
-        42      image 1 p3 
+        28      image 1 p1 on target plate (reference body)
+        48      image 1 p2
+        42      image 1 p3
         22      image 1 p4
-        28      image 2 p1 
-        48      image 2 p2 
-        42      image 2 p3 
-        23      image 2 p4 
-        28      image 3 p1 
-        48      image 3 p2 
-        42      image 3 p3 
-        22      image 3 p4 
-        28      image 4 p1 
-        48      image 4 p2 
-        42      image 4 p3 
+        28      image 2 p1
+        48      image 2 p2
+        42      image 2 p3
+        23      image 2 p4
+        28      image 3 p1
+        48      image 3 p2
+        42      image 3 p3
+        22      image 3 p4
+        28      image 4 p1
+        48      image 4 p2
+        42      image 4 p3
         22      image 4 p4
     """
 
 #     nr = List(List(Int))
-    
-    def __init__(self, n_img = Int, n_pts = Int, nr = List(List(Int)), path = Parameters.default_path):
+
+    def __init__(self, n_img=Int, n_pts=Int, nr=List(List(Int)), path=Parameters.default_path):
         Parameters.__init__(self, path)
         self.set(n_img, n_pts, nr)
-    
-    def set(self, n_img = Int, n_pts = Int, nr = List(List(Int))):
+
+    def set(self, n_img=Int, n_pts=Int, nr=List(List(Int))):
         self.n_img = n_img
         self.n_pts = n_pts
         self.nr = nr
-        
+
     def filename(self):
         return "man_ori.par"
 
     def read(self):
-        #print "inside ManOriParams.read"
+        # print "inside ManOriParams.read"
         try:
             f = open(self.filepath(), 'r')
-            
+
             self.nr = []
 #            for i in range(self.n_img):
             for i in range(max_camera):
@@ -609,23 +620,23 @@ class ManOriParams(Parameters):
             f.close()
         except:
             error(None, "Error reading %s." % self.filepath())
-        
+
     def write(self):
-        #print "inside # Params.write"
+        # print "inside # Params.write"
         try:
             f = open(self.filepath(), 'w')
 #            for i in range(self.n_img):
             for i in range(max_camera):
                 for j in range(self.n_pts):
                     f.write("%d\n" % self.nr[i][j])
-            
+
             f.close()
             return True
         except:
             error(None, "Error writing %s." % self.filepath())
             return False
 
-            
+
 class DetectPlateParams(Parameters):
     """
         detect_plate.par: parameters for control point detection
@@ -643,7 +654,7 @@ class DetectPlateParams(Parameters):
         100 sum of grey value
         3 size of crosses
     """
-    
+
 #     gvth_1 = Int
 #     gvth_2 = Int
 #     gvth_3 = Int
@@ -657,20 +668,22 @@ class DetectPlateParams(Parameters):
 #     max_npix_y = Int
 #     sum_grey = Int
 #     size_cross = Int
-    
-    def __init__(self, gvth_1 = Int, gvth_2 = Int, gvth_3 = Int, gvth_4 = Int, tol_dis = Int, min_npix = Int, max_npix = Int, min_npix_x = Int, max_npix_x = Int, min_npix_y = Int, max_npix_y = Int, sum_grey = Int, size_cross = Int, path = Parameters.default_path):
+
+    def __init__(self, gvth_1=Int, gvth_2=Int, gvth_3=Int, gvth_4=Int, tol_dis=Int, min_npix=Int, max_npix=Int, min_npix_x=Int, max_npix_x=Int, min_npix_y=Int, max_npix_y=Int, sum_grey=Int, size_cross=Int, path=Parameters.default_path):
         Parameters.__init__(self, path)
-        self.set(gvth_1, gvth_2, gvth_3, gvth_4, tol_dis, min_npix, max_npix, min_npix_x, max_npix_x, min_npix_y, max_npix_y, sum_grey, size_cross)
-        
-    def set(self, gvth_1 = Int, gvth_2 = Int, gvth_3 = Int, gvth_4 = Int, tol_dis = Int, min_npix = Int, max_npix = Int, min_npix_x = Int, max_npix_x = Int, min_npix_y = Int, max_npix_y = Int, sum_grey = Int, size_cross = Int):
+        self.set(gvth_1, gvth_2, gvth_3, gvth_4, tol_dis, min_npix, max_npix,
+                 min_npix_x, max_npix_x, min_npix_y, max_npix_y, sum_grey, size_cross)
+
+    def set(self, gvth_1=Int, gvth_2=Int, gvth_3=Int, gvth_4=Int, tol_dis=Int, min_npix=Int, max_npix=Int, min_npix_x=Int, max_npix_x=Int, min_npix_y=Int, max_npix_y=Int, sum_grey=Int, size_cross=Int):
         (self.gvth_1, self.gvth_2, self.gvth_3, self.gvth_4, self.tol_dis, self.min_npix, self.max_npix, self.min_npix_x, self.max_npix_x, self.min_npix_y, self.max_npix_y, self.sum_grey, self.size_cross) = \
-            (gvth_1, gvth_2, gvth_3, gvth_4, tol_dis, min_npix, max_npix, min_npix_x, max_npix_x, min_npix_y, max_npix_y, sum_grey, size_cross)
+            (gvth_1, gvth_2, gvth_3, gvth_4, tol_dis, min_npix, max_npix,
+             min_npix_x, max_npix_x, min_npix_y, max_npix_y, sum_grey, size_cross)
 
     def filename(self):
         return "detect_plate.par"
-        
+
     def read(self):
-        #print "inside DetectPlateParams.read"
+        # print "inside DetectPlateParams.read"
         try:
             f = open(self.filepath(), 'r')
 
@@ -687,13 +700,13 @@ class DetectPlateParams(Parameters):
             self.max_npix_y = int(g(f))
             self.sum_grey = int(g(f))
             self.size_cross = int(g(f))
-            
+
             f.close()
         except:
             error(None, "Error reading %s." % self.filepath())
-        
+
     def write(self):
-        #print "inside DetectPlateParams.write"
+        # print "inside DetectPlateParams.write"
         try:
             f = open(self.filepath(), 'w')
 
@@ -710,7 +723,7 @@ class DetectPlateParams(Parameters):
             f.write("%d\n" % int(self.max_npix_y))
             f.write("%d\n" % int(self.sum_grey))
             f.write("%d\n" % int(self.size_cross))
-            
+
             f.close()
             return True
         except:
@@ -738,7 +751,7 @@ class OrientParams(Parameters):
         1 she
         0 interf
     """
-    
+
 #     pnfo = Int
 #     prin_dis = Int
 #     xp = Int
@@ -752,19 +765,19 @@ class OrientParams(Parameters):
 #     she = Int
 #     interf = Int
 
-    def __init__(self, pnfo = Int, prin_dis = Int, xp = Int, yp = Int, k1 = Int, k2 = Int, k3 = Int, p1 = Int, p2 = Int, scx = Int, she = Int, interf = Int, path = Parameters.default_path):
+    def __init__(self, pnfo=Int, prin_dis=Int, xp=Int, yp=Int, k1=Int, k2=Int, k3=Int, p1=Int, p2=Int, scx=Int, she=Int, interf=Int, path=Parameters.default_path):
         Parameters.__init__(self, path)
         self.set(pnfo, prin_dis, xp, yp, k1, k2, k3, p1, p2, scx, she, interf)
-        
-    def set(self, pnfo = Int, prin_dis = Int, xp = Int, yp = Int, k1 = Int, k2 = Int, k3 = Int, p1 = Int, p2 = Int, scx = Int, she = Int, interf = Int):
+
+    def set(self, pnfo=Int, prin_dis=Int, xp=Int, yp=Int, k1=Int, k2=Int, k3=Int, p1=Int, p2=Int, scx=Int, she=Int, interf=Int):
         (self.pnfo, self.prin_dis, self.xp, self.yp, self.k1, self.k2, self.k3, self.p1, self.p2, self.scx, self.she, self.interf) = \
             (pnfo, prin_dis, xp, yp, k1, k2, k3, p1, p2, scx, she, interf)
 
     def filename(self):
         return "orient.par"
-        
+
     def read(self):
-        #print "inside OrientParams.read"
+        # print "inside OrientParams.read"
         try:
             f = open(self.filepath(), 'r')
 
@@ -780,13 +793,13 @@ class OrientParams(Parameters):
             self.scx = int(g(f))
             self.she = int(g(f))
             self.interf = int(g(f))
-            
+
             f.close()
         except:
             error(None, "Error reading %s." % self.filepath())
-        
+
     def write(self):
-        #print "inside OrientParams.write"
+        # print "inside OrientParams.write"
         try:
             f = open(self.filepath(), 'w')
 
@@ -811,31 +824,33 @@ class OrientParams(Parameters):
 
 
 class TrackingParams(Parameters):
-#     dvxmin = Float
-#     dvxmax = Float
-#     dvymin = Float
-#     dvymax = Float
-#     dvzmin = Float
-#     dvzmax = Float
-#     angle = Float
-#     dacc = Float
-#     flagNewParticles = Bool
-    
-    def __init__(self, dvxmin = Float, dvxmax = Float, dvymin = Float, dvymax = Float, \
-    dvzmin = Float, dvzmax = Float, angle = Float, dacc = Float, \
-    flagNewParticles = Bool, path = Parameters.default_path):
+    #     dvxmin = Float
+    #     dvxmax = Float
+    #     dvymin = Float
+    #     dvymax = Float
+    #     dvzmin = Float
+    #     dvzmax = Float
+    #     angle = Float
+    #     dacc = Float
+    #     flagNewParticles = Bool
+
+    def __init__(self, dvxmin=Float, dvxmax=Float, dvymin=Float, dvymax=Float,
+                 dvzmin=Float, dvzmax=Float, angle=Float, dacc=Float,
+                 flagNewParticles=Bool, path=Parameters.default_path):
         Parameters.__init__(self, path)
-        self.set(dvxmin, dvxmax, dvymin, dvymax, dvzmin, dvzmax, angle, dacc, flagNewParticles)
-        
-    def set(self, dvxmin = Float, dvxmax = Float, dvymin = Float, dvymax = Float, dvzmin = Float, dvzmax = Float, angle = Float, dacc = Float, flagNewParticles = Bool):
+        self.set(dvxmin, dvxmax, dvymin, dvymax, dvzmin,
+                 dvzmax, angle, dacc, flagNewParticles)
+
+    def set(self, dvxmin=Float, dvxmax=Float, dvymin=Float, dvymax=Float, dvzmin=Float, dvzmax=Float, angle=Float, dacc=Float, flagNewParticles=Bool):
         (self.dvxmin, self.dvxmax, self.dvymin, self.dvymax, self.dvzmin, self.dvzmax, self.angle, self.dacc, self.flagNewParticles) = \
-            (dvxmin, dvxmax, dvymin, dvymax, dvzmin, dvzmax, angle, dacc, flagNewParticles)
+            (dvxmin, dvxmax, dvymin, dvymax, dvzmin,
+             dvzmax, angle, dacc, flagNewParticles)
 
     def filename(self):
         return "track.par"
 
     def read(self):
-        #print "inside TrackingParams.read"
+        # print "inside TrackingParams.read"
         try:
             f = open(self.filepath(), 'r')
             self.dvxmin = float(g(f))
@@ -844,13 +859,13 @@ class TrackingParams(Parameters):
             self.dvymax = float(g(f))
             self.dvzmin = float(g(f))
             self.dvzmax = float(g(f))
-            self.angle  = float(g(f))
-            self.dacc   = float(g(f))
-            self.flagNewParticles = (int(g(f))!=0)
+            self.angle = float(g(f))
+            self.dacc = float(g(f))
+            self.flagNewParticles = (int(g(f)) != 0)
             f.close()
         except:
             error(None, "Error reading %s." % self.filepath())
-        
+
     def write(self):
         try:
             f = open(self.filepath(), 'w')
@@ -868,23 +883,23 @@ class TrackingParams(Parameters):
         except:
             error(None, "Error writing %s." % self.filepath())
             return False
-    
-    
-class PftVersionParams(Parameters):
-#     Existing_Target = Int
 
-    def __init__(self, Existing_Target = Int, path = Parameters.default_path):
+
+class PftVersionParams(Parameters):
+    #     Existing_Target = Int
+
+    def __init__(self, Existing_Target=Int, path=Parameters.default_path):
         Parameters.__init__(self, path)
         self.set(Existing_Target)
-        
-    def set(self, Existing_Target = Int):
+
+    def set(self, Existing_Target=Int):
         self.Existing_Target = Existing_Target
 
     def filename(self):
         return "pft_version.par"
-        
+
     def read(self):
-        #print "inside PftVersionParams.read"
+        # print "inside PftVersionParams.read"
         try:
             f = open(self.filepath(), 'r')
 
@@ -893,14 +908,14 @@ class PftVersionParams(Parameters):
             f.close()
         except:
             error(None, "Error reading %s." % self.filepath())
-        
+
     def write(self):
-        #print "inside PftVersionParams.write"
+        # print "inside PftVersionParams.write"
         try:
             f = open(self.filepath(), 'w')
 
             f.write("%d\n" % self.Existing_Target)
-            
+
             f.close()
             return True
         except:
@@ -909,46 +924,46 @@ class PftVersionParams(Parameters):
 
 
 class ExamineParams(Parameters):
-#     Examine_Flag = Bool
-#     Combine_Flag = Bool
+    #     Examine_Flag = Bool
+    #     Combine_Flag = Bool
 
-    def __init__(self, Examine_Flag = Bool, Combine_Flag = Bool, path = Parameters.default_path):
+    def __init__(self, Examine_Flag=Bool, Combine_Flag=Bool, path=Parameters.default_path):
         Parameters.__init__(self, path)
         self.set(Examine_Flag, Combine_Flag)
-        
-    def set(self, Examine_Flag = Bool, Combine_Flag = Bool):
+
+    def set(self, Examine_Flag=Bool, Combine_Flag=Bool):
         (self.Examine_Flag, self.Combine_Flag) = \
             (Examine_Flag, Combine_Flag)
 
     def filename(self):
         return "examine.par"
-        
+
     def read(self):
         if os.path.exists(self.filepath()) is False:
             f = open(self.filepath(), 'w')
             f.write("%d\n" % 0)
             f.write("%d\n" % 0)
             f.close()
-            
-        #print "inside ExamineParams.read"
+
+        # print "inside ExamineParams.read"
         try:
             f = open(self.filepath(), 'r')
 
-            self.Examine_Flag = (int(g(f))!=0)
-            self.Combine_Flag = (int(g(f))!=0)
+            self.Examine_Flag = (int(g(f)) != 0)
+            self.Combine_Flag = (int(g(f)) != 0)
 
             f.close()
         except:
             error(None, "Error reading %s." % self.filepath())
-        
+
     def write(self):
-        #print "inside ExamineParams.write"
+        # print "inside ExamineParams.write"
         try:
             f = open(self.filepath(), 'w')
 
             f.write("%d\n" % self.Examine_Flag)
             f.write("%d\n" % self.Combine_Flag)
-            
+
             f.close()
             return True
         except:
@@ -966,7 +981,7 @@ class DumbbellParams(Parameters):
         2 step size through sequence
         500 num iterations per click
     """
-    
+
 #     dumbbell_eps = Float
 #     dumbbell_scale = Float
 #     dumbbell_gradient_descent = Float
@@ -974,19 +989,21 @@ class DumbbellParams(Parameters):
 #     dumbbell_step = Int
 #     dumbbell_niter = Int
 
-    def __init__(self, dumbbell_eps = Float, dumbbell_scale = Float, dumbbell_gradient_descent = Float, dumbbell_penalty_weight = Float, dumbbell_step = Int, dumbbell_niter = Int, path = Parameters.default_path):
+    def __init__(self, dumbbell_eps=Float, dumbbell_scale=Float, dumbbell_gradient_descent=Float, dumbbell_penalty_weight=Float, dumbbell_step=Int, dumbbell_niter=Int, path=Parameters.default_path):
         Parameters.__init__(self, path)
-        self.set(dumbbell_eps, dumbbell_scale, dumbbell_gradient_descent, dumbbell_penalty_weight, dumbbell_step, dumbbell_niter)
-        
-    def set(self, dumbbell_eps = Float, dumbbell_scale = Float, dumbbell_gradient_descent = Float, dumbbell_penalty_weight = Float, dumbbell_step = Int, dumbbell_niter = Int):
+        self.set(dumbbell_eps, dumbbell_scale, dumbbell_gradient_descent,
+                 dumbbell_penalty_weight, dumbbell_step, dumbbell_niter)
+
+    def set(self, dumbbell_eps=Float, dumbbell_scale=Float, dumbbell_gradient_descent=Float, dumbbell_penalty_weight=Float, dumbbell_step=Int, dumbbell_niter=Int):
         (self.dumbbell_eps, self.dumbbell_scale, self.dumbbell_gradient_descent, self.dumbbell_penalty_weight, self.dumbbell_step, self.dumbbell_niter) = \
-            (dumbbell_eps, dumbbell_scale, dumbbell_gradient_descent, dumbbell_penalty_weight, dumbbell_step, dumbbell_niter)
+            (dumbbell_eps, dumbbell_scale, dumbbell_gradient_descent,
+             dumbbell_penalty_weight, dumbbell_step, dumbbell_niter)
 
     def filename(self):
         return "dumbbell.par"
-        
+
     def read(self):
-        #print "inside DumbbellParams.read"
+        # print "inside DumbbellParams.read"
         if os.path.exists(self.filepath()) is False:
             f = open(self.filepath(), 'w')
             f.write("%f\n" % 0.0)
@@ -996,7 +1013,7 @@ class DumbbellParams(Parameters):
             f.write("%d\n" % 0.0)
             f.write("%d\n" % 0.0)
             f.close()
-            
+
         try:
             f = open(self.filepath(), 'r')
 
@@ -1010,9 +1027,9 @@ class DumbbellParams(Parameters):
             f.close()
         except:
             error(None, "Error reading %s." % self.filepath())
-        
+
     def write(self):
-        #print "inside DumbbellParams.write"
+        # print "inside DumbbellParams.write"
         try:
             f = open(self.filepath(), 'w')
 
@@ -1022,7 +1039,7 @@ class DumbbellParams(Parameters):
             f.write("%f\n" % self.dumbbell_penalty_weight)
             f.write("%d\n" % self.dumbbell_step)
             f.write("%d\n" % self.dumbbell_niter)
-            
+
             f.close()
             return True
         except:
@@ -1038,25 +1055,27 @@ class ShakingParams(Parameters):
         10 - max num points used per frame
         5 - max number of frames to track
     """
-    
+
 #     shaking_first_frame = Int
 #     shaking_last_frame = Int
 #     shaking_max_num_points = Int
 #     shaking_max_num_frames = Int
-    
-    def __init__(self, shaking_first_frame = Int, shaking_last_frame = Int, shaking_max_num_points = Int, shaking_max_num_frames = Int, path = Parameters.default_path):
+
+    def __init__(self, shaking_first_frame=Int, shaking_last_frame=Int, shaking_max_num_points=Int, shaking_max_num_frames=Int, path=Parameters.default_path):
         Parameters.__init__(self, path)
-        self.set(shaking_first_frame, shaking_last_frame, shaking_max_num_points, shaking_max_num_frames)
-        
-    def set(self, shaking_first_frame = Int, shaking_last_frame = Int, shaking_max_num_points = Int, shaking_max_num_frames = Int):
+        self.set(shaking_first_frame, shaking_last_frame,
+                 shaking_max_num_points, shaking_max_num_frames)
+
+    def set(self, shaking_first_frame=Int, shaking_last_frame=Int, shaking_max_num_points=Int, shaking_max_num_frames=Int):
         (self.shaking_first_frame, self.shaking_last_frame, self.shaking_max_num_points, self.shaking_max_num_frames) = \
-            (shaking_first_frame, shaking_last_frame, shaking_max_num_points, shaking_max_num_frames)
+            (shaking_first_frame, shaking_last_frame,
+             shaking_max_num_points, shaking_max_num_frames)
 
     def filename(self):
         return "shaking.par"
-        
+
     def read(self):
-        #print "inside ShakingParams.read"
+        # print "inside ShakingParams.read"
         if os.path.exists(self.filepath()) is False:
             f = open(self.filepath(), 'w')
             f.write("%f\n" % 0)
@@ -1065,7 +1084,6 @@ class ShakingParams(Parameters):
             f.write("%f\n" % 0)
             f.close()
 
-            
         try:
             f = open(self.filepath(), 'r')
 
@@ -1077,9 +1095,9 @@ class ShakingParams(Parameters):
             f.close()
         except:
             error(None, "Error reading %s." % self.filepath())
-        
+
     def write(self):
-        #print "inside ShakingParams.write"
+        # print "inside ShakingParams.write"
         try:
             f = open(self.filepath(), 'w')
 
@@ -1087,7 +1105,7 @@ class ShakingParams(Parameters):
             f.write("%d\n" % self.shaking_last_frame)
             f.write("%d\n" % self.shaking_max_num_points)
             f.write("%d\n" % self.shaking_max_num_frames)
-            
+
             f.close()
             return True
         except:

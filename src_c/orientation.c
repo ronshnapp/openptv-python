@@ -55,7 +55,11 @@ void prepare_eval (control_par *cpar, int *n_fix) {
     frame frm;
     frame_init(&frm, cpar->num_cams, MAX_TARGETS);
     
-	seq_par = read_sequence_par("parameters/sequence.par", cpar->num_cams);
+    if (cpar->num_cams < 4){
+        seq_par = read_sequence_par("parameters/sequence.par", 4);
+    } else {
+        seq_par = read_sequence_par("parameters/sequence.par", cpar->num_cams);
+    }
 
 	fpp = fopen ("parameters/dumbbell.par", "r");
     if (fpp){
@@ -119,7 +123,12 @@ void prepare_eval_shake(control_par *cpar) {
     frame frm;
     frame_init(&frm, cpar->num_cams, MAX_TARGETS);
     
-	seq_par = read_sequence_par("parameters/sequence.par", cpar->num_cams);
+    if (cpar->num_cams < 4){
+        seq_par = read_sequence_par("parametes/sequence.par", 4);
+    } else {
+        seq_par = read_sequence_par("parameters/sequence.par", cpar->num_cams);
+    }
+
 
 	fpp = fopen ("parameters/shaking.par", "r");
     fscanf (fpp,"%d\n", &seq_first);
@@ -463,7 +472,7 @@ int	       	nfix;		# of object points
 		 if(best_residual-residual < 0){ //then try other direction
 			 cal[i_img].ext_par.omega -= 2*drad;
 			 rotation_matrix (&(cal[i_img].ext_par));
-	         eval_ori_v2(cal, db_scale, weight_scale, cpar->mm, nfix, 
+	         eval_ori_v2(cal, db_scale, weight_scale, cpar->num_cams, nfix, 
                 &epi_miss, &dist, &residual, *(cpar->mm));
 			 if(best_residual-residual < 0){// then leave it unchanged
                   cal[i_img].ext_par.omega += drad;
@@ -1013,13 +1022,10 @@ int         *num_used;  /* Number of points used for orientation */
 
   /* show original images with residual vectors (requires globals) */
   for (i = 0; i < n_obs - 10; i += 2) {
-    n = pixnr[i/2];
-    //intx2 = intx1 + resi[i]*5000;
-    //inty2 = inty1 + resi[i+1]*5000;
-    resid_x[n]=resi[i];
-	resid_y[n]=resi[i+1];
+    resid_x[pixnr[i/2]]=resi[i];
+	resid_y[pixnr[i/2]]=resi[i+1];
   }
-  *num_used = n; /* last n, maximal. */
+  *num_used = (n_obs - 10)/2;
 
 
   if (convergeflag){
@@ -1069,7 +1075,7 @@ int raw_orient_v3 (Exterior Ex0, Interior I, Glass G0, ap_52 ap, mm_np mm,
 
 ///////////make a menu so one see the raw guess!!!!!
   if(only_show==1) stopflag=1;
-/////// Beat Lüthi 9. Mai 2007
+/////// Beat LÃ¼thi 9. Mai 2007
 
   while ((stopflag == 0) && (itnum < 20)) {
     ++itnum;

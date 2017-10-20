@@ -243,8 +243,12 @@ int start_proc_c()
         strcpy (img_hp_name[i], cpar->img_base_name[i]);
         strcat (img_hp_name[i], "_hp");
         
-        strcpy (img_ori[i], img_cal[i]);  strcat (img_ori[i], ".ori");
+        strcpy (img_ori[i], img_cal[i]); strcat (img_ori[i], ".ori");  
         strcpy (img_addpar[i], img_cal[i]); strcat (img_addpar[i],".addpar");
+        
+        printf("Debugging\n");
+        printf("%s -> %s, %s \n", img_cal[i], img_ori[i], img_addpar[i]);
+
         
         /*  read orientation and additional parameters  */
         UPDATE_CALIBRATION(i, &Ex[i], &I[i], &G[i], img_ori[i], &(ap[i]),
@@ -411,8 +415,6 @@ int detection_proc_c(char **image_names)
         /* reorganize target numbers */
         for (i=0; i<num[i_img]; i++)  pix[i_img][i].pnr = i;
     }
-    printf("pix.x01=%f\n",pix[0][0].x);
-	printf("pix.y01=%f\n",pix[0][0].y);
     
     sprintf (buf, "Number of detected particles per image");
     printf("%s\n", val);
@@ -674,8 +676,9 @@ int calibration_proc_c (int sel)
                 nfix = k;
                 
                 /* read initial guess orientation from the ori files, no add params */
-                read_ori (&Ex[i], &I[i], &G[i], img_ori0[i], &(ap[i]), 
+                UPDATE_CALIBRATION(i, &Ex[i], &I[i], &G[i], img_ori0[i], &(ap[i]),
                     img_addpar0[i], "addpar.raw");
+                rotation_matrix(&(Ex[i]));
                 
                 /* presenting detected points by back-projection */
                 just_plot (Ex[i], I[i], G[i], ap[i], nfix, fix, i, cpar);
