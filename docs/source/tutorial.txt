@@ -3,6 +3,14 @@ Tutorials
 ==========
 
 
+.. toctree::
+   :maxdepth: 1
+   
+   how_to_use_custom_target_files
+   
+   
+
+
 Please, see our screencasts for the quick overview and the step-by-step tutorial:
 
 - Tutorial 1: <http://youtu.be/S2fY5WFsFwo>
