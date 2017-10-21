@@ -12,7 +12,7 @@ Introduction
 The OpenPTV contains of two main parts: 
 
 #. Core library written in C, called `liboptv <http://github.com/OpenPTV/openptv/tree/master/liboptv>`_
-#. Python frontend GUI and control entitled `openptv-python <http://github.com/OpenPTV/openptv-python>`_ (note that we support so far Python 2.x, Python 3 is not yet tested)
+#. Python 2, Enthought ETS based frontend GUI and control entitled `openptv-python <http://github.com/OpenPTV/openptv-python>`_ (note that we support so far Python 2.x, Python 3 is not yet tested)
 
 
 The C library ``liboptv`` is using Check framework for the unit tests and Cmake project for the build. We recommend installing both software packages, however it is not obligatory, you may skip the relevant parts if you're not going to develop or test the library.
@@ -21,7 +21,7 @@ The C library ``liboptv`` is using Check framework for the unit tests and Cmake 
 The Python GUI is based on the great packages of NumPy, SciPy, Enthought TraitsUI, Cython (for linking to the ``liboptv``) and these have to be installed prior to installing ``openptv-python``. NOTE THAT WE ARE STILL USING PYTHON 2.X
 
 
-You need to install both ``liboptv`` and ``openptv-python`` parts to make OpenPTV working. It is possible, however, to use pre-compiled binaries for the ``liboptv``. We explain all the possibilities in this document. 
+You need to install first ``liboptv`` and then it Python bindings and after that the ``openptv-python`` part to make OpenPTV working and accessible through GUI. It is possible, however, to use pre-compiled binaries for the ``liboptv``. We explain all the possibilities in this document. 
 
 
 liboptv - a library of the OpenPTV algorithms
@@ -40,7 +40,7 @@ Below are instructions for building it and making it ready for use, either from
 a source distribution (a tarball with all necessary files) or directly from a 
 Git repository. 
 
-Installing on Ubuntu (14.04 LTS "Trusty"):
+Installing on Ubuntu or Mac OS X:
 -----------------------------
 
 #. Create the directory that will contain everything::
@@ -63,18 +63,15 @@ Installing on Ubuntu (14.04 LTS "Trusty"):
 
 	 sudo apt-get install git
 
-#. Install Anaconda Python distribution, download from http://continuum.io/downloads and run:: 
+#. Install Canopy Python distribution (2 or higher), download from https://store.enthought.com/downloads/ - Python 2.7 version, follow their instructions, on http://docs.enthought.com/canopy/2.1/quick-start.html  (some version of Canopy 2.1 or higher) ::
 
-	$ bash Anaconda2-4.0.0-Linux-x86.sh
+        bash canopy_xxx.xxx.sh
 
-   restart the bash terminal and update the packages (some might be already installed) ::
+#. Run Canopy (either `~/Canopy/canopy` or `Applications -> Canopy`)
 
-	 conda update conda
-	 conda update anaconda
-	 conda install cython
-	 conda install chaco
-	 conda install kiwisolver
-	 conda install pyqt	
+#. Add scikit-image package through Canopy Package Manager
+
+#. Open Canopy Terminal through `Canopy -> Tools -> Canopy Terminal`
 
 #. Get OpenPTV library `liboptv`, compile it using cmake and test it::  
 
@@ -106,23 +103,13 @@ Installing on Ubuntu (14.04 LTS "Trusty"):
 
 	 git clone https://github.com/OpenPTV/test_cavity.git
 	 
-#. set up the path::
+#. Run the software using the `test_cavity` folder, if all works fine, that's it::
 
-      LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH python pyptv_gui.py test_cavity
-
-or if you need it permanently, add at the end of your `~/.bashrc` file::
-
-      export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-
-close and open the terminal. 
-
-#. Run the software, if all works fine, that's it::
-
-	 python pyptv_gui.py test_cavity
+	 python pyptv_gui.py ~/openptv/test_cavity
 
 If you encounter the error like this while trying to run the ``openptv-python``::
 
-	 python pyptv_gui.py ../../ptv_test_folder/
+	 python pyptv_gui.py ../../test_cavity
    
     > Wrong experimental directory /home/hristo/ptv_test_folder
 	> src_path= /home/hristo/openptv-python/src_c
@@ -143,7 +130,6 @@ or ::
 Whichever works, it is then useful to update the local ~/.bashrc file to define this every time one opens a shell.
 
 
-
 Building from source/Installing on Mac OS X:
 --------------------------------------------
 
@@ -154,11 +140,8 @@ the Mac OS package.
 Installing directly from the source tree in Git is fast and simple, using 
 CMake. Before installation first we need to make sure that the dependencies are installed. A bit more detailed instructions for Ubuntu users are given below.  
 
-1. The tests of liboptv depend on the Check framework. You can either get it 
-   from your package manager (on Ubuntu::
-   
-	sudo apt-get install check
-    
+1. The tests of `liboptv` depend on the Check framework. You can either get it 
+   from your package manager (e.g. on Ubuntu `sudo apt-get install check'), 
    or get the source package  from <http://check.sourceforge.net> and install according 
    to the instructions in the Check package. Typically you would need to run 
    the following commands in a shell::
@@ -294,12 +277,12 @@ separated by a semicolon (;) charachter from the directories already listed.
 Installing Python environment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We recommend using WinPython, Pythonxy, Canopy (Enthought) or Anaconda (Continuum Analytics) and use their package managers to get all the necessary packages. The main ones are:: 
+We recommend using Canopy 2+ (from Enthought) to get all the necessary packages. The main ones are:: 
 
     * Numpy
     * Scipy
     * Cython
-    * ETS from Enthought (including Traits, Chaco and Pyface)
+    * ETS from Enthought (including Traits, Chaco and Pyface - most difficult to build yourself)
     * PyQt
 
 
@@ -335,18 +318,4 @@ Yes, follow these instructions https://github.com/OpenPTV/openptv-python/wiki/No
 If I do not want to use package managers but to get all the Python packages at once?
 ------------------------------------------------------------------------------------
 
-You can get one of the Python development environments for your platform. Some had good experiences with WinPython, PythonXY, Canopy and later Anaconda. NOTE THAT WE HAVE NOT TESTED PYTHON 3 AND WE ARE USING AND SUPPORTING PYTHON 2.X. 
-
- 
-
-
-
-
-
-
-
-
-
-
-
-
+You can get one of the Python development environments for your platform. Some had good experiences with WinPython, PythonXY, Canopy and later Anaconda. NOTE THAT WE HAVE NOT TESTED PYTHON 3 AND WE ARE USING AND SUPPORTING PYTHON 2.X.
