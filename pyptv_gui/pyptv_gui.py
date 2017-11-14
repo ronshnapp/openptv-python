@@ -1092,7 +1092,10 @@ class MainGUI (HasTraits):
         try:
             temp_img = img_as_ubyte(imread(img_name))
         except:
-            print "Error reading file"
+            print("Error reading file, setting zero image")
+            h_img=self.exp1.active_params.m_params.imx
+            v_img=self.exp1.active_params.m_params.imy
+            temp_img = img_as_ubyte(np.zeros((h_img,v_img)))
         if not display_only:
             ptv.py_set_img(temp_img,j)
         if len(temp_img)>0:
