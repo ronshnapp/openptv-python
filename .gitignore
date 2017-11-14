@@ -69,3 +69,4 @@ tracking_framebuf.c
 tests_c/*.log
 tests_c/*.trs
 
+*.bak

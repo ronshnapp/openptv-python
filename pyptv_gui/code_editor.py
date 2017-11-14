@@ -1,15 +1,16 @@
 """
 Editor for editing the cameras ori files
 """
+from __future__ import absolute_import
 # Imports:
+from builtins import range
 from traits.api \
-    import HasTraits, Code, Int, List, Str, Button, Float, Instance, Directory, File
+    import HasTraits, Code, Int, List, Button, File
 
 from traitsui.api \
-    import Item, Group, View, Handler, Tabbed, ListEditor
+    import Item, Group, View, ListEditor
 
 
-from traitsui.menu import MenuBar, ToolBar, Menu, Action, OKCancelButtons
 import os
 import parameters as par
 
