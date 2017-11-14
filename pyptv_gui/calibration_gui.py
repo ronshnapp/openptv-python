@@ -524,7 +524,7 @@ class calibration_gui(HasTraits):
                 'imagedata', self.ori_img[i].astype(np.float))
             self.camera[i]._img_plot = self.camera[
                 i]._plot.img_plot('imagedata', colormap=gray)[0]
-            self.camera[i].drawquiver(x1[i], y1[i], x2[i], y2[i], "red",scale=10.0)
+            self.camera[i].drawquiver(x1[i], y1[i], x2[i], y2[i], "red")
             self.camera[i]._plot.index_mapper.range.set_bounds(0, self.h_pixel)
             self.camera[i]._plot.value_mapper.range.set_bounds(0, self.v_pixel)
 
