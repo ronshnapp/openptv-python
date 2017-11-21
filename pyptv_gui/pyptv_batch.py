@@ -9,16 +9,19 @@ the present "active" parameters are kept intact except the sequence
 
 
 """
+from __future__ import print_function
+from __future__ import absolute_import
 
 
+from builtins import range
 from scipy.misc import imread
 import os
 import sys
 import numpy as np
 
 # project specific inputs
-import parameters as par
-import general
+from . import parameters as par
+from . import general
 
 
 # directory from which we run the software
@@ -31,7 +34,7 @@ if len(sys.argv) < 4:
     print("Wrong number of inputs, usage: python pyptv_batch.py experiments/exp1 seq_first seq_last")
 
 software_path = os.path.split(os.path.abspath(sys.argv[0]))[0]
-print 'software_path=', software_path
+print('software_path=', software_path)
 
 try:
     os.chdir(software_path)
@@ -45,7 +48,7 @@ import ptv1 as ptv
 
 
 exp_path = os.path.abspath(sys.argv[1])
-print 'exp_path=', exp_path
+print('exp_path=', exp_path)
 
 
 try:
@@ -69,7 +72,7 @@ def sequence_tracking(n_img):
     stepshake = ptv.py_get_from_sequence_init()
     if not stepshake:
         stepshake = 1
-    print stepshake
+    print(stepshake)
     temp_img = np.array([], dtype=np.ubyte)
     for i in range(seq_first, seq_last + 1, stepshake):
         if i < 10:
@@ -80,11 +83,11 @@ def sequence_tracking(n_img):
             seq_ch = "%03d" % i
         for j in range(n_img):
             img_name = base_name[j] + seq_ch
-            print ("Setting image: ", img_name)
+            print(("Setting image: ", img_name))
             try:
                 temp_img = imread(img_name).astype(np.ubyte)
             except:
-                print "Error reading file"
+                print("Error reading file")
 
             ptv.py_set_img(temp_img, j)
 
@@ -93,15 +96,15 @@ def sequence_tracking(n_img):
 
 #	forward tracking
     run_info = ptv.py_trackcorr_init()
-    print run_info.get_sequence_range()
+    print(run_info.get_sequence_range())
     for step in range(*run_info.get_sequence_range()):
-        print step
+        print(step)
         ptv.py_trackcorr_loop(run_info, step, display=0)
 
     ptv.py_trackcorr_finish(run_info, step + 1)
-    print "tracking without display finished"
+    print("tracking without display finished")
     ptv.py_trackback_c()
-    print "tracking backwards is finished"
+    print("tracking backwards is finished")
 
 
 def sequence(n_img):
@@ -118,7 +121,7 @@ def sequence(n_img):
     stepshake = ptv.py_get_from_sequence_init()
     if not stepshake:
         stepshake = 1
-    print stepshake
+    print(stepshake)
     temp_img = np.array([], dtype=np.ubyte)
     for i in range(seq_first, seq_last + 1, stepshake):
         if i < 10:
@@ -129,11 +132,11 @@ def sequence(n_img):
             seq_ch = "%03d" % i
         for j in range(n_img):
             img_name = base_name[j] + seq_ch
-            print ("Setting image: ", img_name)
+            print(("Setting image: ", img_name))
             try:
                 temp_img = imread(img_name).astype(np.ubyte)
             except:
-                print "Error reading file"
+                print("Error reading file")
 
             ptv.py_set_img(temp_img, j)
 
@@ -182,4 +185,4 @@ if __name__ == '__main__':
             general.printException()
 
     end = time.time()
-    print 'time lapsed %f sec' % (end - start)
+    print('time lapsed %f sec' % (end - start))
