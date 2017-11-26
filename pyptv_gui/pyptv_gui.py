@@ -1059,7 +1059,7 @@ class MainGUI (HasTraits):
 ##                    (str_plt+"vec_x0",str_plt+"vec_y0",x0[i][j],y0[i][j],x1[i][j],y1[i][j],"orange")
 ##                    self.camera_list[i].drawline\
 ##                    (str_plt+"vec_x1",str_plt+"vec_y1",x1[i][j],y1[i][j],x2[i][j],y2[i][j],"white")
-            self.load_set_seq_image(step,update_all=False,display_only=True)
+            #self.load_set_seq_image(step,update_all=False,display_only=True)
             self.camera_list[self.current_camera]._plot.request_redraw()
             time.sleep(0.1)
             self.tr_thread.can_continue=True
@@ -1084,7 +1084,7 @@ class MainGUI (HasTraits):
         else:
             for j in range (n_camera):
                 img_name=self.base_name[j]+seq_ch
-                self.load_disp_image(img_name,j,display_only)
+                #self.load_disp_image(img_name,j,display_only) RON
 
 
     def load_disp_image(self, img_name,j,display_only=False):
