@@ -20,8 +20,8 @@ import sys
 import numpy as np
 
 # project specific inputs
-from . import parameters as par
-from . import general
+import parameters as par
+import general
 
 
 # directory from which we run the software
