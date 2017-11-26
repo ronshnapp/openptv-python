@@ -271,7 +271,7 @@ int pre_processing_c(int y_remap_mode)
 {
     int i_img, sup, i;
     
-    sprintf(val, "Filtering with Highpass");
+    printf("\n Highpass filtering \n");
     
     /* read support of unsharp mask */
     fpp = fopen ("parameters/unsharp_mask.par", "r");
@@ -396,6 +396,7 @@ int detection_proc_c(char **image_names)
                 /* this works here only for the pre-processing stage */
                 
                 num[i_img] = read_targets(pix[i_img], image_names[i_img], 0);
+                for (i=0; i<num[i_img];i++) pix[i_img][i].tnr = -1;
                                 
                 // printf("pix.x0=%f\n",pix[i_img][0].x);
                 // printf("pix.y0=%f\n",pix[i_img][0].y);
@@ -483,8 +484,8 @@ int calibration_proc_c (int sel)
     int prev, next; 
     int chfield;       		       	/* flag for field mode */
     
-    double resid_x[1000], resid_y[1000]; /* raw residuals */
-    int pixnr[1000]; /* Array for numbers of points used by the end 
+    double resid_x[10000], resid_y[10000]; /* raw residuals */
+    int pixnr[10000]; /* Array for numbers of points used by the end 
                         orientation. Waits for a redesign. */
     
     double dummy_float;
@@ -593,11 +594,17 @@ int calibration_proc_c (int sel)
             
             
         case 2: // puts ("Detection procedure"); strcpy(val,"");
-            
-            printf("Detection procedure\n");
-            
+                        
             /* Highpass Filtering */
-            pre_processing_c (chfield);
+            if (cpar->hp_flag) {
+                pre_processing_c (cpar->chfield);
+                printf("\n Highpass switched on, flag is %d \n",cpar->hp_flag);
+                } 
+                else { 
+                    printf ("\n Highpass switched off, flag is %d \n",cpar->hp_flag); 
+                }
+
+            // pre_processing_c (chfield);
             
             /* reset zoom values */
             for (i = 0; i < cpar->num_cams; i++)

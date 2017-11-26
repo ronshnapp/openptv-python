@@ -667,10 +667,10 @@ int         *num_used;  /* Number of points used for orientation */
     k1flag, k2flag, k3flag, p1flag, p2flag;
   int  	intx1, intx2, inty1, inty2;
   double dm = 0.00001,  drad = 0.0000001;
-  double       	X[1800][19], Xh[1800][19], y[1800], yh[1800], ident[10],
-    XPX[19][19], XPy[19], beta[19], Xbeta[1800],
-    resi[1800], omega=0, sigma0, sigmabeta[19],
-    P[1800], p, sumP;
+  double       	X[10000][19], Xh[10000][19], y[10000], yh[10000], ident[10],
+    XPX[19][19], XPy[19], beta[19], Xbeta[10000],
+    resi[10000], omega=0, sigma0, sigmabeta[19],
+    P[10000], p, sumP;
   double xp, yp, xpd, ypd, r, qq;
   FILE 	*fp1;
   int dummy, multi,numbers;
@@ -727,7 +727,7 @@ int         *num_used;  /* Number of points used for orientation */
   printf("\n Inside orient_v3, initialize memory \n");
 
   /* init X, y (set to zero) */
-  for (i=0; i<1800; i++)
+  for (i=0; i<10000; i++)
     {
       for (j=0; j<19; j++) {
         X[i][j] = 0.0;
@@ -774,7 +774,7 @@ int         *num_used;  /* Number of points used for orientation */
 	  /* check for correct correspondence */
 	  if (crd[i].pnr != fix[i].pnr)	continue;
 
-
+      
 	  pixnr[n/2] = i;		/* for drawing residuals */
 	  pos[0] = fix[i].x;
       pos[1] = fix[i].y;
@@ -1018,6 +1018,9 @@ int         *num_used;  /* Number of points used for orientation */
   printf ("p2            = %8.5f   +/- %8.5f\n", ap0.p2, sigmabeta[13]);
   printf ("scale for x'  = %8.5f   +/- %8.5f\n", ap0.scx, sigmabeta[14]);
   printf ("shearing      = %8.5f   +/- %8.5f\n", ap0.she*ro, sigmabeta[15]*ro);
+  
+  
+  
 
 
   /* show original images with residual vectors (requires globals) */

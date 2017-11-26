@@ -57,7 +57,7 @@ except:
 
 
 src_path = os.path.join(os.path.split(software_path)[0],'src_c')
-print 'src_path=', src_path
+print('src_path=', src_path)
 if not os.path.isdir(src_path):
     print("Wrong src_c path %s" % src_path)
 sys.path.append(src_path)
@@ -122,8 +122,7 @@ class Clicker(ImageInspectorTool):
             self.y=(y_index)
 
             self.right_changed=1-self.right_changed
-            print self.x
-            print self.y
+            print(self.x, self.y)
 
             self.last_mouse_position = (event.x, event.y)
         return
@@ -185,7 +184,7 @@ class CameraWindow (HasTraits):
         """ left_clicked_event - processes left click mouse avents and displays coordinate and grey value information
         on the screen
         """
-        print "x = %d, y= %d, grey= %d " % (self._click_tool.x,self._click_tool.y,self._click_tool.data_value)
+        print("x = %d, y= %d, grey= %d " % (self._click_tool.x,self._click_tool.y,self._click_tool.data_value))
         #need to priny gray value
 
     def right_clicked_event(self):
@@ -205,7 +204,7 @@ class CameraWindow (HasTraits):
         example usage:
             update_image(image,is_float=False)
         """
-        print image.shape, is_float
+        print('image shape = ',image.shape, 'is_float =', is_float)
         if image.ndim > 2:
             image = img_as_ubyte(rgb2gray(image))
             is_float = False
@@ -313,7 +312,7 @@ class TrackThread(Thread):
     """ TrackThread is used by tracking with display function - runs separate thread that updates the gui
     """
     def run(self):
-        print "tracking with display thread started"
+        print("tracking with display thread started")
         run_info = ptv.py_trackcorr_init() #init the relevant C function
         for step in range(*run_info.get_sequence_range()): #Loop over each step in sequence
             self.track_step=step
@@ -332,7 +331,7 @@ class TrackThread(Thread):
         for i in range(len(main_gui.camera_list)): # refresh cameras
             main_gui.camera_list[i]._plot.request_redraw()
 
-        print "tracking with display thread finished"
+        print("tracking with display thread finished")
 
 class TreeMenuHandler (Handler):
     """ TreeMenuHanlder contains all the callback actions of menu bar, processing of tree editor, and reactions of the GUI to the user clicks
@@ -349,7 +348,7 @@ class TreeMenuHandler (Handler):
     def configure_main_par(self, editor, object):
         experiment = editor.get_parent(object)
         paramset = object
-        print 'Total paramsets:', len(experiment.paramsets)
+        print('Total paramsets:', len(experiment.paramsets))
         if paramset.m_params==None:
             #TODO: is it possible that control reaches here? If not, probably the if should be removed.
             paramset.m_params=Main_Params()
@@ -361,7 +360,7 @@ class TreeMenuHandler (Handler):
     def configure_cal_par(self, editor, object):
         experiment = editor.get_parent(object)
         paramset = object
-        print len(experiment.paramsets)
+        print(len(experiment.paramsets))
         if paramset.c_params==None:
             #TODO: is it possible that control reaches here? If not, probably the if should be removed.
             paramset.c_params=Calib_Params()
@@ -372,7 +371,7 @@ class TreeMenuHandler (Handler):
     def configure_track_par(self, editor, object):
         experiment = editor.get_parent(object)
         paramset = object
-        print len(experiment.paramsets)
+        print(len(experiment.paramsets))
         if paramset.t_params==None:
             #TODO: is it possible that control reaches here? If not, probably the if should be removed.
             paramset.t_params=Tracking_Params()
@@ -445,7 +444,7 @@ class TreeMenuHandler (Handler):
         directory_dialog = DirectoryEditorDialog()
         directory_dialog.edit_traits()
         exp_path = directory_dialog.dir_name
-        print "Changing experimental path to %s" % exp_path
+        print("Changing experimental path to %s" % exp_path)
         os.chdir(exp_path)
         info.object.exp1.populate_runs(exp_path)
 
@@ -508,7 +507,14 @@ class TreeMenuHandler (Handler):
         mainGui.exp1.syncActiveDir() #synchronize the active run params dir with the temp params dir
 
         for i in range (0,len(mainGui.camera_list)):
-            exec("mainGui.orig_image[%d]=img_as_ubyte(imread(mainGui.exp1.active_params.m_params.Name_%d_Image))" %(i,i+1))
+            try:
+                exec("mainGui.orig_image[%d]=img_as_ubyte(imread(mainGui.exp1.active_params.m_params.Name_%d_Image))" %(i,i+1))
+            except IOError:
+                print("Error reading file, setting zero image")
+                h_img = mainGui.exp1.active_params.m_params.imx
+                v_img = mainGui.exp1.active_params.m_params.imy
+                temp_img = img_as_ubyte(np.zeros((h_img,v_img)))
+                exec("mainGui.orig_image[%d]= temp_img" % i)
             if hasattr(mainGui.camera_list[i],'_img_plot'):
                 del mainGui.camera_list[i]._img_plot
         mainGui.clear_plots()
@@ -689,20 +695,20 @@ class TreeMenuHandler (Handler):
                     if (targets[h].tnr() > -1):
                         intx_green.append(int(imx/2 + zoomf*(tx - zoomx)))
                         inty_green.append(int(imy/2 + zoomf*(ty - zoomy)))
-                    else:
-                        intx_blue.append(int(imx/2 + zoomf*(tx - zoomx)))
-                        inty_blue.append(int(imy/2 + zoomf*(ty - zoomy)))
+#                    else:
+#                        intx_blue.append(int(imx/2 + zoomf*(tx - zoomx)))
+#                        inty_blue.append(int(imy/2 + zoomf*(ty - zoomy)))
 
                 x1_a[i_img]=x1_a[i_img]+intx_green # add current step to result array
-                x2_a[i_img]=x2_a[i_img]+intx_blue
+#                x2_a[i_img]=x2_a[i_img]+intx_blue
                 y1_a[i_img]=y1_a[i_img]+inty_green
-                y2_a[i_img]=y2_a[i_img]+inty_blue
+#                y2_a[i_img]=y2_a[i_img]+inty_blue
 #                info.object.camera_list[i_img].drawcross(str(i_seq)+"x_tr_gr",str(i_seq)+"y_tr_gr",intx_green,inty_green,"green",3)
 #                info.object.camera_list[i_img].drawcross(str(i_seq)+"x_tr_bl",str(i_seq)+"y_tr_bl",intx_blue,inty_blue,"blue",2)
         #plot result arrays
         for i_img in range(n_images):
             info.object.camera_list[i_img].drawcross("x_tr_gr","y_tr_gr",x1_a[i_img],y1_a[i_img],"green",3)
-            info.object.camera_list[i_img].drawcross("x_tr_bl","y_tr_bl",x2_a[i_img],y2_a[i_img],"blue",2)
+#            info.object.camera_list[i_img].drawcross("x_tr_bl","y_tr_bl",x2_a[i_img],y2_a[i_img],"blue",2)
             info.object.camera_list[i_img]._plot.request_redraw()
 
         print "Finished detect_part_track"
@@ -1092,7 +1098,10 @@ class MainGUI (HasTraits):
         try:
             temp_img = img_as_ubyte(imread(img_name))
         except:
-            print "Error reading file"
+            print("Error reading file, setting zero image")
+            h_img=self.exp1.active_params.m_params.imx
+            v_img=self.exp1.active_params.m_params.imy
+            temp_img = img_as_ubyte(np.zeros((h_img,v_img)))
         if not display_only:
             ptv.py_set_img(temp_img,j)
         if len(temp_img)>0:

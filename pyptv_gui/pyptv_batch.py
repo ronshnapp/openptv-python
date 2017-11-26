@@ -31,6 +31,7 @@ cwd = os.getcwd()
 
 
 
+
 def sequence_tracking(n_img, track_backward = True):
     # get following variables from the parameters:
     # n_camera, seq_first, seq_last, base_name
@@ -82,8 +83,8 @@ def sequence_tracking(n_img, track_backward = True):
 
     ptv.py_trackcorr_finish(run_info, step + 1)
     print "tracking without display finished"
-    
-    # RON - back tracking is now optional 
+
+    # RON - back tracking is optional 
     if track_backward:
         ptv.py_trackback_c()
         print "tracking backwards is finished"
@@ -153,7 +154,9 @@ def run_batch(new_seq_first, new_seq_last, track_backwards = True):
     # if you need sequence only:
     # sequence(n_img)
     
+
 def main(sys_argv, repetitions=1, track_backwards = True):
+
     """ runs the batch 
     Usage: 
         main([software_path, exp_dir, first, last], [repetitions])
@@ -217,7 +220,6 @@ def main(sys_argv, repetitions=1, track_backwards = True):
 
 
 if __name__ == '__main__':
-
     if len(sys.argv) < 4:
         print("Wrong number of inputs, usage: python pyptv_batch.py \
         experiments/exp1 seq_first seq_last")
