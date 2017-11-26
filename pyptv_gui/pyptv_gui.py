@@ -7,12 +7,6 @@ The software is distributed under the terms of MIT-like license
 http://opensource.org/licenses/MIT
 
 """
-from __future__ import division
-from __future__ import print_function
-from __future__ import absolute_import
-from builtins import str
-from builtins import range
-from past.utils import old_div
 import os, sys
 import time
 import numpy as np
@@ -128,8 +122,7 @@ class Clicker(ImageInspectorTool):
             self.y=(y_index)
 
             self.right_changed=1-self.right_changed
-            print(self.x)
-            print(self.y)
+            print(self.x, self.y)
 
             self.last_mouse_position = (event.x, event.y)
         return
@@ -211,7 +204,7 @@ class CameraWindow (HasTraits):
         example usage:
             update_image(image,is_float=False)
         """
-        print(image.shape, is_float)
+        print('image shape = ',image.shape, 'is_float =', is_float)
         if image.ndim > 2:
             image = img_as_ubyte(rgb2gray(image))
             is_float = False
@@ -514,7 +507,14 @@ class TreeMenuHandler (Handler):
         mainGui.exp1.syncActiveDir() #synchronize the active run params dir with the temp params dir
 
         for i in range (0,len(mainGui.camera_list)):
-            exec("mainGui.orig_image[%d]=img_as_ubyte(imread(mainGui.exp1.active_params.m_params.Name_%d_Image))" %(i,i+1))
+            try:
+                exec("mainGui.orig_image[%d]=img_as_ubyte(imread(mainGui.exp1.active_params.m_params.Name_%d_Image))" %(i,i+1))
+            except IOError:
+                print("Error reading file, setting zero image")
+                h_img = mainGui.exp1.active_params.m_params.imx
+                v_img = mainGui.exp1.active_params.m_params.imy
+                temp_img = img_as_ubyte(np.zeros((h_img,v_img)))
+                exec("mainGui.orig_image[%d]= temp_img" % i)
             if hasattr(mainGui.camera_list[i],'_img_plot'):
                 del mainGui.camera_list[i]._img_plot
         mainGui.clear_plots()
@@ -572,18 +572,18 @@ class TreeMenuHandler (Handler):
             print ("Starting sequence action (default algorithm)")
             seq_first=info.object.exp1.active_params.m_params.Seq_First
             seq_last=info.object.exp1.active_params.m_params.Seq_Last
-            print(seq_first,seq_last)
+            print('sequence first, last: ', seq_first,seq_last)
             base_name=[]
             for i in range (n_camera):
                 exec("base_name.append(info.object.exp1.active_params.m_params.Basename_%d_Seq)" %(i+1))
-                print(base_name[i])
+                print('base name: ', base_name[i])
 
             ptv.py_sequence_init(0) #init C sequence function
             stepshake=ptv.py_get_from_sequence_init() #get parameters and pass to main loop
             if not stepshake:
                 stepshake=1
 
-            print(stepshake)
+            print('step: ',stepshake)
             temp_img=np.array([],dtype=np.ubyte)
             # main loop - format image name, read it and call v.py_sequence_loop(..) for current step
             for i in range(seq_first,seq_last+1,stepshake):
@@ -593,7 +593,7 @@ class TreeMenuHandler (Handler):
                     print ("Setting image: %s" % img_name)
                     try:
                         temp_img = img_as_ubyte(imread(img_name))
-                    except:
+                    except IOError:
                         print("Error reading file")
 
                     ptv.py_set_img(temp_img,j)
@@ -621,9 +621,9 @@ class TreeMenuHandler (Handler):
         if extern_tracker=='default':
             print("Using default tracker")
             run_info = ptv.py_trackcorr_init()
-            print(run_info.get_sequence_range())
+            print('sequence: ', run_info.get_sequence_range())
             for step in range(*run_info.get_sequence_range()):
-                print(step)
+                print('step: ', step)
                 ptv.py_trackcorr_loop(run_info, step, display=0)
 
             #finalize tracking
@@ -684,7 +684,7 @@ class TreeMenuHandler (Handler):
 
         for i_seq in range(seq_first, seq_last+1): #loop over sequences
             for i_img in range(n_images):
-                intx_green,inty_green,intx_blue,inty_blue=[],[],[],[]
+                # intx_green,inty_green,intx_blue,inty_blue=[],[],[],[]
                 imx, imy, zoomx, zoomy, zoomf = ptv.py_get_mark_track_c(i_img)
                 targets = read_targets(base_names[i_img], i_seq)
 
@@ -693,22 +693,22 @@ class TreeMenuHandler (Handler):
                     tx, ty = targets[h].pos()
 
                     if (targets[h].tnr() > -1):
-                        intx_green.append(int(old_div(imx,2) + zoomf*(tx - zoomx)))
-                        inty_green.append(int(old_div(imy,2) + zoomf*(ty - zoomy)))
-                    else:
-                        intx_blue.append(int(old_div(imx,2) + zoomf*(tx - zoomx)))
-                        inty_blue.append(int(old_div(imy,2) + zoomf*(ty - zoomy)))
+                        intx_green.append(int(imx/2 + zoomf*(tx - zoomx)))
+                        inty_green.append(int(imy/2 + zoomf*(ty - zoomy)))
+#                    else:
+#                        intx_blue.append(int(imx/2 + zoomf*(tx - zoomx)))
+#                        inty_blue.append(int(imy/2 + zoomf*(ty - zoomy)))
 
                 x1_a[i_img]=x1_a[i_img]+intx_green # add current step to result array
-                x2_a[i_img]=x2_a[i_img]+intx_blue
+#                x2_a[i_img]=x2_a[i_img]+intx_blue
                 y1_a[i_img]=y1_a[i_img]+inty_green
-                y2_a[i_img]=y2_a[i_img]+inty_blue
+#                y2_a[i_img]=y2_a[i_img]+inty_blue
 #                info.object.camera_list[i_img].drawcross(str(i_seq)+"x_tr_gr",str(i_seq)+"y_tr_gr",intx_green,inty_green,"green",3)
 #                info.object.camera_list[i_img].drawcross(str(i_seq)+"x_tr_bl",str(i_seq)+"y_tr_bl",intx_blue,inty_blue,"blue",2)
         #plot result arrays
         for i_img in range(n_images):
             info.object.camera_list[i_img].drawcross("x_tr_gr","y_tr_gr",x1_a[i_img],y1_a[i_img],"green",3)
-            info.object.camera_list[i_img].drawcross("x_tr_bl","y_tr_bl",x2_a[i_img],y2_a[i_img],"blue",2)
+#            info.object.camera_list[i_img].drawcross("x_tr_bl","y_tr_bl",x2_a[i_img],y2_a[i_img],"blue",2)
             info.object.camera_list[i_img]._plot.request_redraw()
 
         print("Finished detect_part_track")
@@ -942,7 +942,7 @@ class MainGUI (HasTraits):
         self.exp1.populate_runs(exp_path)
         self.plugins=Plugins()
         self.n_camera=self.exp1.active_params.m_params.Num_Cam
-        print(self.n_camera)
+        print('N camera ', self.n_camera)
         self.orig_image=[]
         self.hp_image=[]
         self.current_camera=0
@@ -960,7 +960,7 @@ class MainGUI (HasTraits):
         x_clicked,y_clicked,n_camera=0,0,0
         h_img=self.exp1.active_params.m_params.imx
         v_img=self.exp1.active_params.m_params.imy
-        print(h_img,v_img)
+        print('h x v image: ', h_img,v_img)
         for i in range(len(self.camera_list)):
 
                 n_camera=i
@@ -980,7 +980,7 @@ class MainGUI (HasTraits):
                     #print [x1[i]],[y1[i]],[x2[i]],[y2[i]]
                     for j in range(len(self.camera_list)):
                         if j is not n_camera:
-                            count=list(self.camera_list[i]._plot.plots.keys())
+                            count=self.camera_list[i]._plot.plots.keys()
                             self.camera_list[j].drawline("right_cl_x"+str(len(count)),\
                             "right_cl_y"+str(len(count)),x1[j],y1[j],x2[j],y2[j],\
                             color_camera[n_camera])
@@ -1022,7 +1022,7 @@ class MainGUI (HasTraits):
             index=None
 
         for i in range(len(self.camera_list)):
-            plot_list=list(self.camera_list[i]._plot.plots.keys())
+            plot_list=self.camera_list[i]._plot.plots.keys()
             #if not remove_background:
             #   index=None
             try:
