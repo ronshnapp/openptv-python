@@ -271,7 +271,7 @@ int pre_processing_c(int y_remap_mode)
 {
     int i_img, sup, i;
     
-    sprintf(val, "Filtering with Highpass");
+    printf("\n Highpass filtering \n");
     
     /* read support of unsharp mask */
     fpp = fopen ("parameters/unsharp_mask.par", "r");
@@ -593,11 +593,17 @@ int calibration_proc_c (int sel)
             
             
         case 2: // puts ("Detection procedure"); strcpy(val,"");
-            
-            printf("Detection procedure\n");
-            
+                        
             /* Highpass Filtering */
-            pre_processing_c (chfield);
+            if (cpar->hp_flag) {
+                pre_processing_c (cpar->chfield);
+                printf("\n Highpass switched on, flag is %d \n",cpar->hp_flag);
+                } 
+                else { 
+                    printf ("\n Highpass switched off, flag is %d \n",cpar->hp_flag); 
+                }
+
+            // pre_processing_c (chfield);
             
             /* reset zoom values */
             for (i = 0; i < cpar->num_cams; i++)
