@@ -396,6 +396,7 @@ int detection_proc_c(char **image_names)
                 /* this works here only for the pre-processing stage */
                 
                 num[i_img] = read_targets(pix[i_img], image_names[i_img], 0);
+                printf("reorganize targets \n");
                 for (i=0; i<num[i_img];i++) pix[i_img][i].tnr = -1;
                                 
                 // printf("pix.x0=%f\n",pix[i_img][0].x);

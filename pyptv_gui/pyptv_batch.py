@@ -129,7 +129,7 @@ def sequence(n_img):
         ptv.py_sequence_loop(0, i)
 
 
-def run_batch(new_seq_first, new_seq_last, track_backwards = True):
+def run_batch(new_seq_first, new_seq_last, tracking = True, track_backwards = True):
     #  	import pdb; pdb.set_trace()
     import ptv1 as ptv
     
@@ -149,13 +149,17 @@ def run_batch(new_seq_first, new_seq_last, track_backwards = True):
     par.SequenceParams(n_img, base_name,
                        new_seq_first, new_seq_last, path=par.temp_path).write()
     # if you need sequence and tracking:
-    sequence_tracking(n_img, track_backwards)
+    if tracking:
+        sequence_tracking(n_img, track_backwards)
 
     # if you need sequence only:
-    # sequence(n_img)
+    else:
+        sequence(n_img)
     
 
-def main(sys_argv, repetitions=1, track_backwards = True):
+
+
+def main(sys_argv, repetitions=1, tracking = True, track_backwards = True):
 
     """ runs the batch 
     Usage: 
@@ -167,6 +171,8 @@ def main(sys_argv, repetitions=1, track_backwards = True):
         exp_dir : directory with the experiment data
         first, last : integer, number of a first and last frame
         repetitions : int, default = 1, optional
+	traking: if True will preform tracking
+	track_backwards: if True will preform trakcing backwards
     """
     software_path = os.path.split(os.path.abspath(sys_argv[0]))[0]
     print 'software_path=', software_path
@@ -193,7 +199,7 @@ def main(sys_argv, repetitions=1, track_backwards = True):
         raise ValueError('Wrong experimental directory %s' % exp_path)
         
 
-# RON - make a res dir if it not found
+    # RON - make a res dir if it not found
 
     if 'res' not in os.listdir(sys_argv[1]):
         print " 'res' folder not found. creating one"
@@ -209,7 +215,7 @@ def main(sys_argv, repetitions=1, track_backwards = True):
             seq_last = sys_argv[3]
        
         try:
-            run_batch(seq_first, seq_last, track_backwards)
+            run_batch(seq_first, seq_last, tracking, track_backwards)
         except:
             print("something wrong with the software or folder")
             general.printException()
